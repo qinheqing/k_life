@@ -225,17 +225,3 @@ VITE_BASE_URL=https://api.gpt.ge/v1/
 ## 📄 License
 
 MIT License
-
-## 👨‍💻 作者
-
-@xiaoeen
-
----
-
-<div align="center">
-
-**Made with ❤️ by @xiaoeen**
-
-⭐ Star this repo if you find it helpful!
-
-</div>
