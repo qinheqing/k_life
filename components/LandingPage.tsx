@@ -105,17 +105,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, lang }) => {
               {lang === 'zh' ? 'app.lifekline.com' : 'app.lifekline.com'}
             </div>
           </div>
-          <div className="pt-10">
+           <div className="pt-10">
             <img
-              src="/doc/k线.png"
-              alt="K-Line Chart Demo"
-              className="w-full h-auto"
-              onError={(e) => {
-                // Fallback if image doesn't load
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
+               src="/doc/k-line-light.png"
+               alt="K-Line Chart Demo"
+               className="w-full h-auto"
+               onError={(e) => {
+                 // Fallback if image doesn't load
+                 e.currentTarget.style.display = 'none';
+               }}
+             />
+           </div>
         </div>
       </div>
 
