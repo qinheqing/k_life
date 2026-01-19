@@ -6,28 +6,29 @@ import BaZiConfirmation from './components/BaZiConfirmation';
 import KLineChart from './components/KLineChart';
 import AnalysisSection from './components/AnalysisSection';
 import ApiQuotaDialog from './components/ApiQuotaDialog';
+import WeChatModal from './components/WeChatModal';
 import { UserInput, AnalysisResult, Language, BaZiResult } from './types';
-import { calculateBaZi, generateDestinyAnalysis } from './services/geminiService';
-import { Sparkles, Languages, Moon, Sun } from 'lucide-react';
-import { Github } from 'lucide-react';
+import { calculateBaZi, generateDestinyAnalysis } from './services/aiService';
+import { Sparkles, Languages, Moon, Sun, MessageCircle } from 'lucide-react';
 import { getTexts } from './locales';
 
 const App: React.FC = () => {
   const [step, setStep] = useState<'landing' | 'input' | 'confirmation' | 'result'>('landing');
   const [loading, setLoading] = useState(false);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
+  const [showWeChatModal, setShowWeChatModal] = useState(false);
 
   // Theme State
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme');
-      // Default to dark theme if no saved preference
+      // Default to light theme if no saved preference
       if (savedTheme) {
         return savedTheme as 'light' | 'dark';
       }
-      return 'dark';
+      return 'light';
     }
-    return 'dark';
+    return 'light';
   });
 
   const [lang, setLang] = useState<Language>('zh'); 
@@ -103,48 +104,34 @@ const App: React.FC = () => {
   // Show landing page without header
   if (step === 'landing') {
     return (
-      <div className="min-h-screen bg-slate-900 font-sans">
+      <div className="min-h-screen font-sans">
         {/* Minimal Header for Landing */}
-        <header className="bg-slate-900/80 backdrop-blur-lg border-b border-slate-800 sticky top-0 z-40">
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="bg-teal-500 text-white p-1.5 rounded-lg">
                   <Sparkles size={18} />
               </div>
               <div>
-                  <h1 className="font-bold text-white text-lg leading-none">{t.appTitle}</h1>
-                  <p className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">AI Destiny Analysis</p>
+                  <h1 className="font-bold text-gray-900 text-lg leading-none">{t.appTitle}</h1>
+                  <p className="text-[10px] text-gray-500 font-medium tracking-wider uppercase">AI Destiny Analysis</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-               {/* VeeverseAI Logo */}
-               <a
-                  href="https://veeverseai.cn/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-200 hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5 border border-slate-700 hover:border-teal-500/50"
-                  title="Visit VeeverseAI"
+               {/* WeChat Button */}
+               <button
+                  onClick={() => setShowWeChatModal(true)}
+                  className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                  title="Contact via WeChat"
                >
-                  <span className="text-teal-400">V</span>
-                  <span className="hidden sm:inline">eeverseAI</span>
-               </a>
-
-               {/* GitHub Link */}
-               <a
-                  href="https://github.com/XIAOEEN/lifeline-k-"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-slate-800 text-gray-300 hover:bg-slate-700 transition-colors"
-                  title="View on GitHub"
-               >
-                  <Github size={16} />
-               </a>
+                  <MessageCircle size={16} />
+               </button>
 
                {/* Theme Toggle */}
                <button
                   onClick={toggleTheme}
-                  className="p-2 rounded-full bg-slate-800 text-gray-300 hover:bg-slate-700 transition-colors"
+                  className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                   title={theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
                >
                   {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
@@ -153,7 +140,7 @@ const App: React.FC = () => {
                {/* Language Toggle */}
                <button
                   onClick={toggleLanguage}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-gray-200 text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium transition-colors"
                >
                   <Languages size={14} className="hidden sm:inline" />
                   <span className="hidden sm:inline">{lang === 'en' ? '中文' : 'English'}</span>
@@ -164,53 +151,45 @@ const App: React.FC = () => {
         </header>
 
         <LandingPage onGetStarted={handleGetStarted} lang={lang} />
+
+        {/* WeChat Modal for Landing Page */}
+        <WeChatModal
+          isOpen={showWeChatModal}
+          onClose={() => setShowWeChatModal(false)}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-amber-50 flex flex-col font-sans transition-colors duration-200">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-200 print:hidden" data-html2canvas-ignore="true">
+      <header className="bg-white dark:bg-white border-b border-gray-200 dark:border-amber-200 sticky top-0 z-40 transition-colors duration-200 print:hidden" data-html2canvas-ignore="true">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-            <div className="bg-black dark:bg-slate-700 text-white p-1.5 rounded-lg transition-colors">
+            <div className="bg-black dark:bg-amber-600 text-white p-1.5 rounded-lg transition-colors">
                 <Sparkles size={18} />
             </div>
             <div>
-                <h1 className="font-bold text-gray-900 dark:text-white text-lg leading-none transition-colors">{t.appTitle}</h1>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wider uppercase transition-colors">AI Destiny Analysis</p>
+                <h1 className="font-bold text-gray-900 dark:text-gray-800 text-lg leading-none transition-colors">{t.appTitle}</h1>
+                <p className="text-[10px] text-gray-500 dark:text-gray-600 font-medium tracking-wider uppercase transition-colors">AI Destiny Analysis</p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 sm:gap-3">
-             {/* VeeverseAI Logo */}
-             <a
-                href="https://veeverseai.cn/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5 border border-gray-200 dark:border-slate-600 hover:border-purple-500/50 dark:hover:border-purple-500/50"
-                title="Visit VeeverseAI"
-             >
-                <span className="text-purple-600 dark:text-purple-400">V</span>
-                <span className="hidden sm:inline">eeverseAI</span>
-             </a>
 
-             {/* GitHub Link */}
-             <a
-                href="https://github.com/XIAOEEN/lifeline-k-"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-                title="View on GitHub"
+          <div className="flex items-center gap-2 sm:gap-3">
+             {/* WeChat Button */}
+             <button
+                onClick={() => setShowWeChatModal(true)}
+                className="p-2 rounded-full bg-gray-100 dark:bg-amber-100 text-gray-600 dark:text-gray-700 hover:bg-gray-200 dark:hover:bg-amber-200 transition-colors"
+                title="Contact via WeChat"
              >
-                <Github size={16} />
-             </a>
+                <MessageCircle size={16} />
+             </button>
 
              {/* Theme Toggle */}
              <button
                 onClick={toggleTheme}
-                className="p-2 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                className="p-2 rounded-full bg-gray-100 dark:bg-amber-100 text-gray-600 dark:text-gray-700 hover:bg-gray-200 dark:hover:bg-amber-200 transition-colors"
                 title={theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
              >
                 {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
@@ -219,7 +198,7 @@ const App: React.FC = () => {
              {/* Language Toggle */}
              <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-amber-100 hover:bg-gray-200 dark:hover:bg-amber-200 text-gray-700 dark:text-gray-800 text-xs font-medium transition-colors"
              >
                 <Languages size={14} className="hidden sm:inline" />
                 <span className="hidden sm:inline">{lang === 'en' ? '中文' : 'English'}</span>
@@ -229,7 +208,7 @@ const App: React.FC = () => {
              {step !== 'input' && (
                 <button
                     onClick={handleReset}
-                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors ml-1 hidden sm:flex items-center"
+                    className="text-sm font-medium text-gray-500 dark:text-gray-600 hover:text-purple-600 dark:hover:text-orange-600 transition-colors ml-1 hidden sm:flex items-center"
                 >
                     ← <span className="ml-1">{t.newReading}</span>
                 </button>
@@ -244,13 +223,13 @@ const App: React.FC = () => {
             <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
                 {/* Hero Section */}
                 <div className="text-center mb-12 max-w-3xl">
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-800 mb-2 transition-colors duration-200">
                         {t.heroTitle1}
                     </h2>
-                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent mb-6">
+                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 dark:from-orange-500 dark:to-amber-500 bg-clip-text text-transparent mb-6 transition-all duration-200">
                         {t.heroTitle2}
                     </h2>
-                    <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-700 text-base md:text-lg leading-relaxed transition-colors duration-200">
                         {t.heroDescription}
                     </p>
                 </div>
@@ -289,8 +268,8 @@ const App: React.FC = () => {
       </main>
 
       {/* Simple Footer */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 py-6 mt-auto print:hidden transition-colors" data-html2canvas-ignore="true">
-        <div className="max-w-5xl mx-auto px-4 text-center text-gray-400 dark:text-gray-500 text-sm">
+      <footer className="bg-white dark:bg-white border-t border-gray-100 dark:border-amber-200 py-6 mt-auto print:hidden transition-colors duration-200" data-html2canvas-ignore="true">
+        <div className="max-w-5xl mx-auto px-4 text-center text-gray-400 dark:text-gray-500 text-sm transition-colors duration-200">
             <p>&copy; {new Date().getFullYear()} {t.appTitle}. {t.footer}</p>
         </div>
       </footer>
@@ -300,6 +279,12 @@ const App: React.FC = () => {
         isOpen={showQuotaDialog}
         onClose={() => setShowQuotaDialog(false)}
         lang={lang}
+      />
+
+      {/* WeChat Modal */}
+      <WeChatModal
+        isOpen={showWeChatModal}
+        onClose={() => setShowWeChatModal(false)}
       />
     </div>
   );

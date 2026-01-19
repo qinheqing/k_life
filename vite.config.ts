@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
               'vendor': ['react', 'react-dom'],
               'charts': ['recharts'],
               'icons': ['lucide-react'],
-              'ai': ['@google/generative-ai', 'openai'],
+              'ai': ['openai'],
               'pdf': ['html2canvas', 'jspdf'],
             }
           }
@@ -64,8 +64,8 @@ export default defineConfig(({ mode }) => {
         }
       ],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.API_KEY': JSON.stringify(env.AI_API_KEY),
+        'process.env.AI_API_KEY': JSON.stringify(env.AI_API_KEY)
       },
       resolve: {
         alias: {

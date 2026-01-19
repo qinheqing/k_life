@@ -29,11 +29,11 @@ const CustomTooltip = ({ active, payload, lang, theme }: any) => {
     const t = getTexts(lang);
     
     // Theme styles for tooltip
-    const bgClass = theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-gray-100 text-gray-800';
-    const textTitleClass = theme === 'dark' ? 'text-white' : 'text-gray-800';
-    const subTextClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-    const labelClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
-    const descClass = theme === 'dark' ? 'text-gray-300 border-slate-700' : 'text-gray-700 border-gray-100';
+    const bgClass = theme === 'dark' ? 'bg-white border-amber-200 text-gray-800' : 'bg-white border-gray-100 text-gray-800';
+    const textTitleClass = theme === 'dark' ? 'text-gray-800' : 'text-gray-800';
+    const subTextClass = theme === 'dark' ? 'text-gray-600' : 'text-gray-500';
+    const labelClass = theme === 'dark' ? 'text-gray-600' : 'text-gray-600';
+    const descClass = theme === 'dark' ? 'text-gray-700 border-amber-200' : 'text-gray-700 border-gray-100';
 
     return (
       <div className={`${bgClass} p-4 border shadow-xl rounded-lg max-w-[250px] z-50`}>
@@ -119,9 +119,9 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
   const t = getTexts(lang);
   
   // Determine chart colors based on theme
-  const gridColor = theme === 'dark' ? '#334155' : '#f0f0f0';
-  const tickColor = theme === 'dark' ? '#64748b' : '#9CA3AF';
-  const axisColor = theme === 'dark' ? '#475569' : '#e5e7eb';
+  const gridColor = theme === 'dark' ? '#fed7aa' : '#f0f0f0'; // amber-200 for dark mode
+  const tickColor = theme === 'dark' ? '#78716c' : '#9CA3AF'; // stone-500 for dark mode
+  const axisColor = theme === 'dark' ? '#fcd34d' : '#e5e7eb'; // amber-300 for dark mode
 
   const chartData = data.map((d) => ({
     ...d,
@@ -129,20 +129,20 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
   }));
 
   return (
-    <div className="w-full bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 mb-8 transition-colors">
+    <div className="w-full bg-white dark:bg-amber-50 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-amber-200 mb-8 transition-colors duration-200">
         <div className="flex justify-between items-end mb-6">
             <div>
                 <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-purple-600 rounded-full"></div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white">{t.klineTitle}</h3>
+                    <div className="w-1 h-6 bg-purple-600 dark:bg-orange-500 rounded-full transition-colors duration-200"></div>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-gray-800 transition-colors duration-200">{t.klineTitle}</h3>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.klineSubtitle}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-600 mt-1 transition-colors duration-200">{t.klineSubtitle}</p>
             </div>
             <div className="flex items-center gap-4 text-xs font-mono">
-                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-700">
                     <div className="w-3 h-3 bg-green-500 rounded-sm"></div> {t.bullMarket}
                 </div>
-                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-700">
                     <div className="w-3 h-3 bg-red-500 rounded-sm"></div> {t.bearMarket}
                 </div>
             </div>
@@ -155,14 +155,14 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
             margin={{ top: 20, right: 30, left: 10, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-            <XAxis 
-                dataKey="age" 
-                tickLine={false} 
+            <XAxis
+                dataKey="age"
+                tickLine={false}
                 axisLine={{ stroke: axisColor }}
                 tick={{fill: tickColor, fontSize: 10}}
                 interval={9} // Show every 10 years roughly
             />
-            <YAxis 
+            <YAxis
                 domain={[0, 110]} // Add padding for the star
                 hide={false}
                 tickLine={false}
@@ -170,29 +170,29 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
                 tick={{fill: tickColor, fontSize: 10}}
                 orientation="right"
             />
-            <Tooltip content={<CustomTooltip lang={lang} theme={theme} />} cursor={{fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)'}} />
-            
+            <Tooltip content={<CustomTooltip lang={lang} theme={theme} />} cursor={{fill: theme === 'dark' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(0,0,0,0.02)'}} />
+
             {/* Candle Bar */}
-            <Bar 
-                dataKey={(datum) => [Math.min(datum.open, datum.close), Math.max(datum.open, datum.close)]} 
-                shape={<CandleShape />} 
+            <Bar
+                dataKey={(datum) => [Math.min(datum.open, datum.close), Math.max(datum.open, datum.close)]}
+                shape={<CandleShape />}
                 animationDuration={1500}
                 isAnimationActive={false} // optimization
             >
                 <LabelList dataKey="peakMarker" content={<PeakStar />} />
             </Bar>
-            
+
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       {/* Volatility Logic Analysis */}
-      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600 transition-colors">
-        <div className="flex items-center gap-2 mb-2 text-slate-700 dark:text-slate-200 font-bold text-sm">
+      <div className="bg-slate-50 dark:bg-amber-100 rounded-xl p-4 border border-slate-100 dark:border-amber-300 transition-colors duration-200">
+        <div className="flex items-center gap-2 mb-2 text-slate-700 dark:text-gray-800 font-bold text-sm transition-colors duration-200">
             <TrendingUp size={16} />
             {t.volatilityAnalysis}
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-gray-700 leading-relaxed transition-colors duration-200">
             {volatilityAnalysis}
         </p>
       </div>

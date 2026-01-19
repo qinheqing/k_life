@@ -43,13 +43,13 @@ const ApiQuotaDialog: React.FC<ApiQuotaDialogProps> = ({ isOpen, onClose, lang }
 
       {/* Dialog */}
       <div
-        className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all"
+        className="relative bg-white dark:bg-amber-50 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all transition-colors duration-200"
         style={{ animation: 'scaleIn 0.2s ease-out' }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-amber-100 transition-colors duration-200"
           aria-label="Close"
         >
           <X size={20} />
@@ -57,36 +57,36 @@ const ApiQuotaDialog: React.FC<ApiQuotaDialogProps> = ({ isOpen, onClose, lang }
 
         {/* Icon */}
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
-            <AlertCircle className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+          <div className="p-3 bg-orange-100 dark:bg-orange-200 rounded-full transition-colors duration-200">
+            <AlertCircle className="w-8 h-8 text-orange-600 dark:text-orange-700 transition-colors duration-200" />
           </div>
         </div>
 
         {/* Content */}
         <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-800 mb-2 transition-colors duration-200">
             {t.title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-3">
+          <p className="text-gray-600 dark:text-gray-700 mb-3 transition-colors duration-200">
             {t.message}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 italic">
+          <p className="text-sm text-gray-500 dark:text-gray-600 italic transition-colors duration-200">
             {t.note}
           </p>
         </div>
 
         {/* Suggestions */}
-        <div className="bg-gray-50 dark:bg-slate-900/50 rounded-xl p-4 mb-6">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div className="bg-gray-50 dark:bg-amber-100 rounded-xl p-4 mb-6 transition-colors duration-200">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-800 mb-2 transition-colors duration-200">
             {t.suggestion}
           </p>
-          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-700">
             <li className="flex items-start gap-2">
-              <span className="text-purple-500 mt-0.5">•</span>
+              <span className="text-purple-500 dark:text-orange-600 mt-0.5">•</span>
               <span>{t.option1}</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-purple-500 mt-0.5">•</span>
+              <span className="text-purple-500 dark:text-orange-600 mt-0.5">•</span>
               <span>{t.option2}</span>
             </li>
           </ul>
@@ -95,7 +95,7 @@ const ApiQuotaDialog: React.FC<ApiQuotaDialogProps> = ({ isOpen, onClose, lang }
         {/* Action Button */}
         <button
           onClick={onClose}
-          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-orange-500 dark:to-amber-500 hover:from-purple-700 hover:to-blue-600 dark:hover:from-orange-600 dark:hover:to-amber-600 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
         >
           {t.closeButton}
         </button>

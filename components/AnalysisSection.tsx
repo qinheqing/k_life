@@ -17,10 +17,10 @@ const RatingBar = ({ rating, lang }: { rating: number, lang: Language }) => {
         <div className="mt-4">
             <div className="flex justify-between items-center mb-1">
                 <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-widest">{t.rating}</span>
-                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{rating} / 10</span>
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-700">{rating} / 10</span>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                <div 
+            <div className="w-full bg-gray-100 dark:bg-amber-200 rounded-full h-2 overflow-hidden transition-colors duration-200">
+                <div
                     className={`h-full rounded-full ${
                         rating >= 8 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
                         rating >= 5 ? 'bg-gradient-to-r from-blue-400 to-indigo-500' :
@@ -34,13 +34,13 @@ const RatingBar = ({ rating, lang }: { rating: number, lang: Language }) => {
 }
 
 const AnalysisCard = ({ title, icon: Icon, data, lang, className }: { title: string, icon: any, data: ScoredContent, lang: Language, className?: string }) => (
-  <div className={`p-6 rounded-2xl border bg-white dark:bg-slate-800 shadow-sm border-gray-100 dark:border-slate-700 hover:shadow-md transition-all flex flex-col justify-between ${className}`}>
+  <div className={`p-6 rounded-2xl border bg-white dark:bg-amber-50 shadow-sm border-gray-100 dark:border-amber-200 hover:shadow-md transition-all flex flex-col justify-between ${className} transition-colors duration-200`}>
     <div>
-        <div className="flex items-center gap-2 mb-4 text-slate-800 dark:text-slate-100">
-            <Icon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+        <div className="flex items-center gap-2 mb-4 text-slate-800 dark:text-gray-800">
+            <Icon className="w-5 h-5 text-purple-600 dark:text-orange-500 transition-colors duration-200" />
             <h3 className="font-bold text-lg">{title}</h3>
         </div>
-        <div className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <div className="text-sm leading-relaxed text-gray-600 dark:text-gray-700">
         {data.content}
         </div>
     </div>
@@ -208,25 +208,25 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysis, lang, theme
       </div>
 
       {/* Yearly Detailed Evaluation */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 transition-colors">
+      <div className="bg-white dark:bg-amber-50 rounded-2xl shadow-sm border border-gray-100 dark:border-amber-200 p-8 transition-colors duration-200">
         <div className="flex items-center gap-2 mb-6">
-            <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t.yearlyReviewTitle}</h2>
+            <Calendar className="w-6 h-6 text-purple-600 dark:text-orange-500 transition-colors duration-200" />
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-gray-800 transition-colors duration-200">{t.yearlyReviewTitle}</h2>
         </div>
         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {analysis.timeline.map((year, index) => (
-                <div key={index} className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border-b border-gray-50 dark:border-slate-700 last:border-0">
+                <div key={index} className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-amber-100 transition-colors border-b border-gray-50 dark:border-amber-200 last:border-0">
                     <div className="flex-shrink-0 w-16 text-center">
-                        <div className="font-bold text-lg text-slate-800 dark:text-slate-100">{year.year}</div>
+                        <div className="font-bold text-lg text-slate-800 dark:text-gray-800">{year.year}</div>
                         <div className="text-xs text-gray-400 dark:text-gray-500">{year.age} {lang === 'zh' ? '岁' : 'y/o'}</div>
                     </div>
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            {year.isPeak && <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 rounded-full font-bold">★ {t.ath}</span>}
+                            {year.isPeak && <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-200 text-yellow-700 dark:text-yellow-800 rounded-full font-bold">★ {t.ath}</span>}
                             <div className={`w-2 h-2 rounded-full ${year.close >= year.open ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{year.summary}</span>
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-600">{year.summary}</span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{year.detailedReview}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-700 leading-relaxed">{year.detailedReview}</p>
                     </div>
                 </div>
             ))}
@@ -237,7 +237,7 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysis, lang, theme
         <button
             onClick={handleDownloadPDF}
             disabled={isGeneratingPdf}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-slate-700 text-white rounded-full font-medium hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-orange-500 text-white rounded-full font-medium hover:bg-gray-800 dark:hover:bg-orange-600 transition-colors shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
         >
             {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             {isGeneratingPdf ? (lang === 'zh' ? '生成中...' : 'Generating...') : t.savePdf}

@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  k-life:
+    image: qinheqing/k-life:latest
+    container_name: k-life
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - TZ=Asia/Shanghai
+
+    # ============================================
+    # Runtime Configuration (Recommended / 推荐)
+    # ============================================
+    # Mount a JSON config file to provide API keys at runtime
+    # 挂载 JSON 配置文件在运行时提供 API Key
+    #
+    # 1. Copy runtime-config.example.json to runtime-config.json
+    #    cp runtime-config.example.json runtime-config.json
+    #
+    # 2. Edit runtime-config.json with your API credentials
+    #    编辑 runtime-config.json 填入你的 API 凭证
+    #
+    # 3. Uncomment the volume line below
+    #    取消注释下面的 volume 行
+    #
+    volumes:
+      - ./runtime-config.json:/config/runtime-config.json:ro
+
+    # ============================================
+    # Build-time Configuration (Alternative / 可选)
+    # ============================================
+    # Uncomment to build image with API keys baked in
+    # 取消注释以构建包含 API Key 的镜像
+    #
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   args:
+    #     AI_PROVIDER: "deepseek"
+    #     AI_API_KEY: "your_api_key_here"
+    #     AI_BASE_URL: "https://api.deepseek.com"
+    #     AI_MODEL: "deepseek-chat"
+
+    networks:
+      - k-life-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  k-life-network:
+    driver: bridge

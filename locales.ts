@@ -2,7 +2,7 @@ import { Language } from "./types";
 
 export const translations = {
   en: {
-    appTitle: "Life K-Line",
+    appTitle: "Life Preview",
     appSubtitle: "Discover your Life's Bull & Bear Markets",
     heroTitle1: "Understand Life's Ups & Downs",
     heroTitle2: "Foresee Your Life Trajectory",
@@ -48,7 +48,7 @@ export const translations = {
     
     savePdf: "Save Report as PDF",
     newReading: "New Reading",
-    footer: "@xiaoeen",
+    footer: "@heqing",
     open: "Open",
     close: "Close",
     high: "High",
@@ -70,7 +70,7 @@ export const translations = {
     backward: "Backward"
   },
   zh: {
-    appTitle: "人生 K 线",
+    appTitle: "人生预览",
     appSubtitle: "发现你生命中的牛市与熊市",
     heroTitle1: "洞悉命运起伏",
     heroTitle2: "预见人生轨迹",
@@ -116,7 +116,7 @@ export const translations = {
     
     savePdf: "保存 PDF 报告",
     newReading: "重新测试",
-    footer: "@xiaoeen",
+    footer: "@heqing",
     open: "开盘",
     close: "收盘",
     high: "最高",

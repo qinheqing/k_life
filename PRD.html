@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生K线 - 产品需求文档 (PRD)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            font-size: 18px;
+            color: #4a5568;
+            margin: 20px 0 10px;
+            font-weight: 600;
+        }
+
+        .change-item {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .change-item .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .change-item .description {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .change-item .details {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .change-item .details ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .change-item .details li {
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .badge-high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .badge-medium {
+            background: #feebc8;
+            color: #c05621;
+        }
+
+        .badge-low {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .before {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+        }
+
+        .after {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+        }
+
+        .comparison-box h4 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .before h4 {
+            color: #c53030;
+        }
+
+        .after h4 {
+            color: #2f855a;
+        }
+
+        .file-list {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .file-list code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #2d3748;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+
+        .timeline-item .dot {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-item .label {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .note strong {
+            color: #c05621;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .timeline::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 人生K线 - 产品需求文档 (PRD)</h1>
+            <p class="subtitle">UI/UX 重构与品牌更新 | Version 2.0</p>
+        </div>
+
+        <div class="content">
+
+            <!-- 项目概览 -->
+            <div class="section">
+                <h2>📋 项目概览</h2>
+                <div class="change-item">
+                    <div class="title">项目背景</div>
+                    <div class="description">
+                        人生K线是一个基于八字命理的AI命运分析应用，通过金融K线图的形式展示用户100年的人生运势。
+                        本次更新旨在优化品牌定位、简化界面设计、统一视觉风格为亮色主题。
+                    </div>
+                    <div class="details">
+                        <strong>核心目标：</strong>
+                        <ul>
+                            <li>提升品牌专业性与清晰度</li>
+                            <li>简化用户界面，减少干扰元素</li>
+                            <li>统一采用亮色设计语言，提高可读性</li>
+                            <li>移除第三方推广内容，专注核心功能</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 需求变更列表 -->
+            <div class="section">
+                <h2>🔄 需求变更详情</h2>
+
+                <!-- 变更1 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-high">优先级: 高</span>
+                        变更 #1: 页面标题更新 - "人生K线" → "人生预览"
+                    </div>
+                    <div class="description">
+                        将应用标题从"人生K线"更改为"人生预览"，使产品定位更加清晰和友好。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>页面头部标题显示（所有页面）</li>
+                            <li>浏览器标签页标题</li>
+                            <li>多语言文本文件（中英文）</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>locales.ts</code> (第5行、第73行)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>中文: 人生 K 线</p>
+                            <p>英文: Life K-Line</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>中文: 人生预览</p>
+                            <p>英文: Life Preview</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 变更2 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-high">优先级: 高</span>
+                        变更 #2: 移除 VeeverseAI 品牌标识
+                    </div>
+                    <div class="description">
+                        从页面头部完全移除 VeeverseAI 的链接和品牌展示，使应用更加独立和专业。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>落地页头部（Landing Page Header）</li>
+                            <li>应用主头部（Main App Header）</li>
+                            <li>头部布局调整（移除后优化间距）</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>App.tsx</code> (第121-131行、第187-197行)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>头部包含：Logo + VeeverseAI + GitHub + 主题切换 + 语言切换</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>头部包含：Logo + GitHub + 主题切换 + 语言切换</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 变更3 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-high">优先级: 高</span>
+                        变更 #3: 整体重新设计 - 统一为亮色主题
+                    </div>
+                    <div class="description">
+                        将整个应用的默认主题从深色改为亮色，并优化所有配色方案以适应亮色背景。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>默认主题设置（首次访问）</li>
+                            <li>落地页背景色（从深灰渐变改为浅色渐变）</li>
+                            <li>所有组件的亮色/深色模式配色</li>
+                            <li>文字颜色、边框颜色、背景色</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>App.tsx</code> (第21-31行 - 默认主题)<br>
+                            <code>components/LandingPage.tsx</code> (背景色系统)<br>
+                            <code>index.css</code> (全局样式)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>默认主题: 深色 (dark mode)</p>
+                            <p>落地页: bg-slate-900 深色渐变</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>默认主题: 亮色 (light mode)</p>
+                            <p>落地页: bg-gray-50 浅色渐变</p>
+                        </div>
+                    </div>
+                    <div class="note">
+                        <strong>⚠️ 注意：</strong> 保留主题切换功能，用户仍可手动切换到深色模式，但默认展示为亮色。
+                    </div>
+                </div>
+
+                <!-- 变更4 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-medium">优先级: 中</span>
+                        变更 #4: 首页 - 删除 "VeeVerse 灵魂旅迹" 推广区块
+                    </div>
+                    <div class="description">
+                        从落地页完全移除 "VeeVerse 灵魂旅迹" 的整个推广区块，专注于产品本身的功能介绍。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>落地页底部推广区块（235-289行）</li>
+                            <li>页面整体高度缩短</li>
+                            <li>用户注意力更集中于核心功能</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>components/LandingPage.tsx</code> (第235-289行)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>包含 VeeVerse 灵魂旅迹推广卡片</p>
+                            <p>包含渐变背景、装饰元素、CTA按钮</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>完全移除此区块</p>
+                            <p>页面在 CTA Section 后直接结束</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 变更5 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-medium">优先级: 中</span>
+                        变更 #5: 首页 - 删除 "系统界面" 展示区块
+                    </div>
+                    <div class="description">
+                        移除展示首页、八字排盘、K线分析的截图区块，简化落地页内容。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>落地页 "Screenshots Section" 区块（164-233行）</li>
+                            <li>包含3个截图卡片：首页、八字排盘、K线分析</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>components/LandingPage.tsx</code> (第164-233行)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>包含 "系统界面" 标题和描述</p>
+                            <p>展示3个产品截图卡片</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>完全移除此区块</p>
+                            <p>保留 "核心功能" 区块</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 变更6 -->
+                <div class="change-item">
+                    <div class="title">
+                        <span class="badge badge-low">优先级: 低</span>
+                        变更 #6: 首页 - 删除 "开源地址" 按钮
+                    </div>
+                    <div class="description">
+                        从落地页 CTA 按钮区域移除 "开源地址" 按钮，只保留 "开始分析" 按钮。
+                    </div>
+                    <div class="details">
+                        <strong>影响范围：</strong>
+                        <ul>
+                            <li>落地页 Hero 区块的按钮组（88-104行）</li>
+                            <li>GitHub 链接仍保留在页面头部</li>
+                        </ul>
+                        <strong>涉及文件：</strong>
+                        <div class="file-list">
+                            <code>components/LandingPage.tsx</code> (第96-103行)
+                        </div>
+                    </div>
+                    <div class="comparison">
+                        <div class="comparison-box before">
+                            <h4>修改前</h4>
+                            <p>两个按钮：开始分析 + 开源地址</p>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>修改后</h4>
+                            <p>单个按钮：开始分析</p>
+                            <p>GitHub链接保留在头部导航</p>
+                        </div>
+                    </div>
+                    <div class="note">
+                        <strong>💡 说明：</strong> GitHub 链接仍保留在页面头部，只是从主 CTA 区域移除，以保持更清晰的转化路径。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 技术实施 -->
+            <div class="section">
+                <h2>🛠️ 技术实施计划</h2>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="dot">1</div>
+                        <div class="label">修改多语言文本</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="dot">2</div>
+                        <div class="label">移除头部品牌元素</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="dot">3</div>
+                        <div class="label">重构配色方案</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="dot">4</div>
+                        <div class="label">精简首页内容</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="dot">5</div>
+                        <div class="label">测试与验证</div>
+                    </div>
+                </div>
+
+                <h3>详细实施步骤</h3>
+
+                <div class="change-item">
+                    <div class="title">步骤 1: 更新多语言文本</div>
+                    <div class="details">
+                        <ul>
+                            <li>修改 <code>locales.ts</code> 中的 <code>appTitle</code> 字段</li>
+                            <li>中文: "人生 K 线" → "人生预览"</li>
+                            <li>英文: "Life K-Line" → "Life Preview"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="change-item">
+                    <div class="title">步骤 2: 清理页面头部</div>
+                    <div class="details">
+                        <ul>
+                            <li>在 <code>App.tsx</code> 中定位两处 VeeverseAI 链接代码</li>
+                            <li>删除 VeeverseAI 的 <code>&lt;a&gt;</code> 标签及其样式</li>
+                            <li>调整 flex 布局间距，保持视觉平衡</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="change-item">
+                    <div class="title">步骤 3: 重新设计配色系统</div>
+                    <div class="details">
+                        <ul>
+                            <li>修改 <code>App.tsx</code> 第28行默认主题: <code>return 'light'</code></li>
+                            <li>更新 <code>LandingPage.tsx</code> 背景色:</li>
+                            <li>• 从: <code>bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900</code></li>
+                            <li>• 改为: <code>bg-gradient-to-b from-gray-50 via-gray-100 to-gray-50</code></li>
+                            <li>调整文字颜色适应亮色背景</li>
+                            <li>更新卡片背景色和边框样式</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="change-item">
+                    <div class="title">步骤 4: 精简落地页内容</div>
+                    <div class="details">
+                        <ul>
+                            <li>删除 "VeeVerse 灵魂旅迹" 完整区块（235-289行）</li>
+                            <li>删除 "系统界面" 展示区块（164-233行）</li>
+                            <li>删除 Hero 区块的"开源地址"按钮（96-103行）</li>
+                            <li>保留内容：Hero、K线演示、核心功能、CTA</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="change-item">
+                    <div class="title">步骤 5: 测试与验证</div>
+                    <div class="details">
+                        <ul>
+                            <li>检查亮色模式下的文字可读性</li>
+                            <li>验证主题切换功能正常</li>
+                            <li>确认中英文双语显示正确</li>
+                            <li>测试移动端响应式布局</li>
+                            <li>验证所有链接功能正常</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配色方案 -->
+            <div class="section">
+                <h2>🎨 新配色方案</h2>
+
+                <div class="change-item">
+                    <div class="title">亮色主题色彩规范</div>
+                    <div class="details">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <tr style="background: #f7fafc;">
+                                <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">元素类型</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">修改前（深色）</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">修改后（亮色）</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;">页面背景</td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>bg-slate-900</code></td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>bg-gray-50</code></td>
+                            </tr>
+                            <tr style="background: #f7fafc;">
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;">标题文字</td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>text-white</code></td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>text-gray-900</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;">正文文字</td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>text-gray-300</code></td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>text-gray-600</code></td>
+                            </tr>
+                            <tr style="background: #f7fafc;">
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;">卡片背景</td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>bg-slate-800/50</code></td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>bg-white/80</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;">主色调</td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>teal-500</code></td>
+                                <td style="padding: 10px; border: 1px solid #e2e8f0;"><code>teal-500</code> (保持不变)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 风险评估 -->
+            <div class="section">
+                <h2>⚠️ 风险评估与缓解</h2>
+
+                <div class="change-item">
+                    <div class="title">潜在风险</div>
+                    <div class="details">
+                        <ul>
+                            <li><strong>色彩对比度：</strong> 亮色模式下需确保文字对比度符合 WCAG 标准</li>
+                            <li><strong>用户习惯：</strong> 现有用户可能习惯深色模式，需要清晰的主题切换入口</li>
+                            <li><strong>品牌一致性：</strong> 配色变更需确保在所有页面保持一致</li>
+                            <li><strong>移动端显示：</strong> 亮色背景在强光下可能影响可读性，需测试</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="change-item">
+                    <div class="title">缓解措施</div>
+                    <div class="details">
+                        <ul>
+                            <li>使用浏览器开发工具检查色彩对比度</li>
+                            <li>保留主题切换功能，默认亮色但可切换深色</li>
+                            <li>在本地充分测试后再部署到生产环境</li>
+                            <li>收集用户反馈，必要时微调配色方案</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 验收标准 -->
+            <div class="section">
+                <h2>✅ 验收标准</h2>
+
+                <div class="change-item">
+                    <div class="title">必须满足的条件</div>
+                    <div class="details">
+                        <ul>
+                            <li>✓ 所有页面的 "人生K线" 已改为 "人生预览"</li>
+                            <li>✓ 页面头部不再显示 VeeverseAI 相关内容</li>
+                            <li>✓ 默认主题为亮色模式</li>
+                            <li>✓ 首页不包含 "VeeVerse 灵魂旅迹" 区块</li>
+                            <li>✓ 首页不包含 "系统界面" 展示区块</li>
+                            <li>✓ Hero 区块只有一个 "开始分析" 按钮</li>
+                            <li>✓ 主题切换功能正常工作</li>
+                            <li>✓ 中英文双语显示正确</li>
+                            <li>✓ 移动端和桌面端显示正常</li>
+                            <li>✓ GitHub 链接仍可访问（在页面头部）</li>
+                            <li>✓ 所有功能按钮正常工作</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 版本信息 -->
+            <div class="section">
+                <h2>📌 版本信息</h2>
+                <div class="change-item">
+                    <div class="details">
+                        <p><strong>文档版本：</strong> 1.0</p>
+                        <p><strong>创建日期：</strong> 2026-01-19</p>
+                        <p><strong>预计工作量：</strong> 2-3 小时</p>
+                        <p><strong>优先级：</strong> 高</p>
+                        <p><strong>状态：</strong> 待实施</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>人生K线 - 产品需求文档 (PRD) | Version 2.0</p>
+            <p>© 2026 All Rights Reserved</p>
+        </div>
+    </div>
+</body>
+</html>

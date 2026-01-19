@@ -30,16 +30,16 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700 transition-colors duration-200">
+    <div className="w-full max-w-md mx-auto bg-white dark:bg-amber-50 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-amber-200 transition-colors duration-200">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-slate-800 dark:text-white serif mb-2 transition-colors">{t.inputTitle}</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors">{t.inputSubtitle}</p>
+        <h2 className="text-3xl font-bold text-slate-800 dark:text-gray-800 serif mb-2 transition-colors">{t.inputTitle}</h2>
+        <p className="text-gray-500 dark:text-gray-600 text-sm transition-colors">{t.inputSubtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">{t.nameLabel}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1 transition-colors">{t.nameLabel}</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <User className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -49,7 +49,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 transition-colors"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-amber-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 dark:bg-white dark:text-gray-800 dark:placeholder-gray-500 transition-colors"
               placeholder={lang === 'zh' ? "您的姓名" : "Your Name"}
             />
           </div>
@@ -57,15 +57,15 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
 
         {/* Gender */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">{t.genderLabel}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1 transition-colors">{t.genderLabel}</label>
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => setFormData({ ...formData, gender: Gender.MALE })}
               className={`py-3 rounded-lg border font-medium transition-all ${
                 formData.gender === Gender.MALE
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300'
-                  : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  ? 'bg-blue-50 dark:bg-blue-100 border-blue-500 text-blue-700 dark:text-blue-800'
+                  : 'border-gray-200 dark:border-amber-200 text-gray-500 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-amber-100'
               }`}
             >
               {t.male}
@@ -75,8 +75,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
               onClick={() => setFormData({ ...formData, gender: Gender.FEMALE })}
               className={`py-3 rounded-lg border font-medium transition-all ${
                 formData.gender === Gender.FEMALE
-                  ? 'bg-pink-50 dark:bg-pink-900/30 border-pink-500 text-pink-700 dark:text-pink-300'
-                  : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  ? 'bg-pink-50 dark:bg-pink-100 border-pink-500 text-pink-700 dark:text-pink-800'
+                  : 'border-gray-200 dark:border-amber-200 text-gray-500 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-amber-100'
               }`}
             >
               {t.female}
@@ -86,7 +86,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
 
         {/* Birth Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">{t.birthDateLabel}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1 transition-colors">{t.birthDateLabel}</label>
           <div className="relative">
              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -97,14 +97,14 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
               required
               value={formData.birthDate}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-slate-700 dark:text-white dark:scheme-dark transition-colors"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-amber-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 dark:bg-white dark:text-gray-800 dark:scheme-dark transition-colors"
             />
           </div>
         </div>
 
         {/* Birth Time */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">{t.birthTimeLabel}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1 transition-colors">{t.birthTimeLabel}</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Clock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -115,14 +115,14 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
               required
               value={formData.birthTime}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-slate-700 dark:text-white dark:scheme-dark transition-colors"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-amber-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 dark:bg-white dark:text-gray-800 dark:scheme-dark transition-colors"
             />
           </div>
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">{t.birthPlaceLabel}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1 transition-colors">{t.birthPlaceLabel}</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MapPin className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -134,7 +134,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
               value={formData.birthLocation}
               onChange={handleChange}
               placeholder={t.birthPlacePlaceholder}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 transition-colors"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-amber-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 dark:bg-white dark:text-gray-800 dark:placeholder-gray-500 transition-colors"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transform transition-all disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-orange-500 dark:to-amber-500 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transform transition-all disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
         >
           {isLoading ? (
             <>
@@ -157,7 +157,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading, lang }) => {
           )}
         </button>
 
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 flex items-start gap-3 transition-colors">
+        <div className="p-4 bg-blue-50 dark:bg-amber-100 rounded-lg text-sm text-blue-700 dark:text-amber-800 border border-blue-100 dark:border-amber-300 flex items-start gap-3 transition-colors">
           <div className="mt-0.5">💡</div>
           <p>{t.tip}</p>
         </div>
