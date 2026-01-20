@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { UserInput, AnalysisResult, Language, BaZiResult } from "../types";
+import { calculateSolarTime, formatSolarTimeDifference } from "./solarTime";
+import { calculateBaZiLocal } from "./baziCalculator";
 
 // ------------------------------------------------------------------
 // 配置与环境变量
@@ -206,32 +208,68 @@ async function callAI(prompt: string, systemPrompt?: string): Promise<any> {
 // ------------------------------------------------------------------
 
 export const calculateBaZi = async (input: UserInput): Promise<BaZiResult> => {
-  const prompt = `
-${baziCalculationSchemaPrompt}
-
-用户信息：
-- 出生日期（公历）：${input.birthDate}
-- 出生时间：${input.birthTime}
-- 出生地：${input.birthLocation}
-- 性别：${input.gender}
-`;
-
+  // -------------------------------------------------------------------
+  // 1. 本地计算真太阳时
+  // -------------------------------------------------------------------
+  let solarTimeData;
   try {
-    const data = await callAI(prompt);
-
-    return {
-      ...data,
-      userInput: input
+    solarTimeData = await calculateSolarTime(
+      input.birthDate,
+      input.birthTime,
+      input.birthLocation
+    );
+    console.log('✓ 真太阳时计算完成:', solarTimeData.solarTime);
+    console.log('  - 原始时间:', input.birthTime);
+    console.log('  - 真太阳时:', solarTimeData.solarTime);
+    console.log('  - 时辰:', solarTimeData.solarHour);
+    console.log('  - 经度:', solarTimeData.longitude);
+    console.log('  - 纬度:', solarTimeData.latitude);
+  } catch (error) {
+    console.error('真太阳时计算失败:', error);
+    solarTimeData = {
+      solarTime: input.birthTime,
+      longitude: 0,
+      latitude: 0,
+      timezone: 'Asia/Shanghai',
+      solarHour: '未知',
     };
-  } catch (error: any) {
-    console.error("BaZi Calculation Error:", error);
-
-    if (isQuotaExhaustedError(error)) {
-      throw new Error("QUOTA_EXHAUSTED");
-    }
-
-    throw error;
   }
+
+  // -------------------------------------------------------------------
+  // 2. 本地计算四柱八字（精确计算，不依赖AI）
+  // -------------------------------------------------------------------
+  let baziData;
+  try {
+    baziData = calculateBaZiLocal(
+      input.birthDate,
+      solarTimeData.solarTime,  // 使用真太阳时
+      input.birthLocation
+    );
+    console.log('✓ 四柱计算完成:');
+    console.log('  - 年柱:', baziData.pillars.year.gan + baziData.pillars.year.zhi);
+    console.log('  - 月柱:', baziData.pillars.month.gan + baziData.pillars.month.zhi);
+    console.log('  - 日柱:', baziData.pillars.day.gan + baziData.pillars.day.zhi);
+    console.log('  - 时柱:', baziData.pillars.hour.gan + baziData.pillars.hour.zhi);
+    console.log('  - 农历:', baziData.lunarDate);
+    console.log('  - 起运:', baziData.startAge + '岁', baziData.direction);
+  } catch (error) {
+    console.error('四柱计算失败:', error);
+    throw new Error('四柱计算失败，请检查输入信息');
+  }
+
+  // -------------------------------------------------------------------
+  // 3. 构造结果（使用本地计算的准确数据）
+  // -------------------------------------------------------------------
+  return {
+    bazi: baziData.pillars,
+    lunarDate: baziData.lunarDate,
+    solarTime: baziData.solarTime,
+    startAge: baziData.startAge,
+    direction: baziData.direction,
+    daYun: baziData.daYun,
+    userInput: input,
+    originalSolarTime: solarTimeData,
+  };
 };
 
 // ------------------------------------------------------------------

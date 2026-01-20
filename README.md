@@ -50,10 +50,10 @@
 ## 核心功能
 
 ### 1. 智能八字排盘系统
-- **真太阳时自动校正**：根据出生地经纬度自动计算真太阳时
-- **农历日期转换**：将公历日期精准转换为农历日期
-- **四柱八字排盘**：自动排列年、月、日、时四柱
-- **大运起运计算**：计算大运起运岁数、顺逆方向
+- **真太阳时自动校正**：根据出生地经纬度自动计算真太阳时（考虑时差和经度修正）
+- **农历日期转换**：将公历日期精准转换为农历日期（干支纪年）
+- **本地四柱计算**：使用 lunar-javascript 库精确计算年、月、日、时四柱，不依赖AI
+- **大运起运计算**：计算大运起运岁数、顺逆方向及大运柱列表
 - **用户确认机制**：提供二次确认界面，确保命盘准确性
 
 ### 2. AI 命运分析引擎
@@ -127,7 +127,53 @@
 - 主题切换的 DOM 操作（classList 操作）
 - 各步骤间的数据传递
 
-#### 2. AI 服务模块 ([services/aiService.ts](services/aiService.ts))
+#### 2. 真太阳时计算模块 ([services/solarTime.ts](services/solarTime.ts))
+
+**核心功能**：精确计算真太阳时，修正平太阳时偏差
+
+**计算原理**：
+```
+真太阳时 = 平太阳时 + 时差 + 经度修正
+```
+
+- **时差（Equation of Time）**：地球轨道椭圆导致的太阳位置差异
+  - 使用美国海军天文台公式计算
+  - 范围：约 -14 分钟到 +16 分钟
+
+- **经度修正**：当地经度与标准经度差异
+  - 每度经度对应 4 分钟
+  - 标准经度：北京时间 120°E
+
+- **地理编码**：通过出生地名称自动获取经纬度
+
+#### 3. 四柱计算模块 ([services/baziCalculator.ts](services/baziCalculator.ts))
+
+**核心功能**：本地精确计算四柱八字
+
+**技术实现**：
+- 使用 `lunar-javascript` 库（v1.7.7）
+- 基于 Solar 和 Lunar 类进行计算
+- 不依赖 AI，保证准确性
+
+**计算结果**：
+```typescript
+interface BaZiCalculationResult {
+  pillars: {
+    year: { gan: string; zhi: string };   // 年干支
+    month: { gan: string; zhi: string };  // 月干支
+    day: { gan: string; zhi: string };    // 日干支
+    hour: { gan: string; zhi: string };   // 时干支
+  };
+  lunarDate: string;      // 农历日期（如"壬申年腊月初九"）
+  solarTime: string;      // 真太阳时
+  solarHour: string;      // 时辰名称
+  startAge: number;       // 起运岁数
+  direction: string;      // 顺行/逆行
+  daYun: string[];       // 大运柱列表
+}
+```
+
+#### 4. AI 服务模块 ([services/aiService.ts](services/aiService.ts))
 
 **架构特点**：支持多 AI 提供商统一架构
 
@@ -141,11 +187,12 @@
 
 ##### calculateBaZi(input: UserInput): Promise<BaZiResult>
 - **功能**：计算八字排盘基础数据
+- **实现**：使用本地计算器（baziCalculator），AI 仅负责运势分析
 - **输入**：用户的出生信息（姓名、性别、出生日期时间、地点）
 - **输出**：
   - 真太阳时 (solarTime)
   - 农历日期 (lunarDate)
-  - 四柱八字 (bazi)
+  - 四柱八字 (bazi) - 本地精确计算
   - 起运岁数 (startAge)
   - 大运顺逆 (direction)
   - 大运柱列表 (daYun)
@@ -366,6 +413,13 @@ const t = getTexts(lang);
 - **DeepSeek**：深度推理模型，适合复杂分析
 - **GLM（智谱AI）**：多种模型选择，快速响应
 - **多提供商架构**：通过 `VITE_AI_PROVIDER` 环境变量切换（deepseek/glm）
+
+#### 命理计算
+- **lunar-javascript 1.7.7**：专业的农历和八字计算库
+  - 公历/农历转换
+  - 干支纪年计算
+  - 四柱八字排盘
+  - 大运起运计算
 
 #### 构建配置
 ```javascript
@@ -599,32 +653,41 @@ npm run pm2:prod
 
 ```
 k_life/
-├── components/              # UI 组件目录
-│   ├── AnalysisSection.tsx  # 分析结果展示（六宫格 + PDF 导出）
-│   ├── ApiQuotaDialog.tsx   # API 配额提示对话框
-│   ├── BaZiConfirmation.tsx # 八字确认页面
-│   ├── BaZiDisplay.tsx      # 八字只读展示
-│   ├── InputForm.tsx        # 输入表单
-│   ├── KLineChart.tsx       # K 线图组件
-│   └── LandingPage.tsx      # 官网落地页
-├── services/                # 服务层
-│   ├── aiService.ts         # AI 交互服务（DeepSeek/GLM 统一架构）
-│   └── geminiService.ts     # 旧版 Gemini 服务（已弃用，可删除）
-├── doc/                     # 文档和图片资源（会被复制到 dist）
-├── App.tsx                  # 应用主组件
-├── constants.ts             # 常量定义（颜色、应用名称）
-├── locales.ts               # 国际化翻译
-├── types.ts                 # TypeScript 类型定义
-├── index.tsx                # 应用入口
-├── vite.config.ts           # Vite 配置
-├── package.json             # 项目依赖
-├── tsconfig.json            # TypeScript 配置
-├── ecosystem.config.cjs     # PM2 配置
-├── .env.example             # 环境变量配置示例
-├── README.md                # 中文说明文档
-├── README_en.md             # 英文说明文档
-├── AI_MIGRATION_GUIDE.md    # AI 服务迁移指南
-└── CLAUDE.md                # Claude Code 工作指南
+ ├── components/              # UI 组件目录
+ │   ├── AnalysisSection.tsx  # 分析结果展示（六宫格 + PDF 导出）
+ │   ├── ApiQuotaDialog.tsx   # API 配额提示对话框
+ │   ├── BaZiConfirmation.tsx # 八字确认页面
+ │   ├── BaZiDisplay.tsx      # 八字只读展示
+ │   ├── InputForm.tsx        # 输入表单
+ │   ├── KLineChart.tsx       # K 线图组件
+ │   └── LandingPage.tsx      # 官网落地页
+ ├── services/                # 服务层
+ │   ├── aiService.ts         # AI 交互服务（DeepSeek/GLM 统一架构）
+ │   ├── baziCalculator.ts    # 本地四柱计算器（lunar-javascript）
+ │   ├── solarTime.ts         # 真太阳时计算服务
+ │   ├── geoLocation.ts       # 地理位置编码服务
+ │   └── geminiService.ts     # 旧版 Gemini 服务（已弃用，可删除）
+ ├── doc/                     # 文档和图片资源（会被复制到 dist）
+ ├── server/                  # 后端服务
+ │   ├── routes/             # API 路由
+ │   ├── data/                # 数据库文件
+ │   └── scripts/            # 工具脚本
+ ├── App.tsx                  # 应用主组件
+ ├── constants.ts             # 常量定义（颜色、应用名称）
+ ├── locales.ts               # 国际化翻译
+ ├── types.ts                 # TypeScript 类型定义
+ ├── index.tsx                # 应用入口
+ ├── vite.config.ts           # Vite 配置
+ ├── package.json             # 项目依赖
+ ├── tsconfig.json            # TypeScript 配置
+ ├── ecosystem.config.cjs     # PM2 配置
+ ├── .env.example             # 环境变量配置示例
+ ├── README.md                # 中文说明文档
+ ├── README_en.md             # 英文说明文档
+ ├── AI_MIGRATION_GUIDE.md    # AI 服务迁移指南
+ ├── SOLAR_TIME_IMPROVEMENT.md # 真太阳时优化文档
+ ├── AGENTS.md                # AI Agent 工作指南
+ └── CLAUDE.md                # Claude Code 工作指南
 ```
 
 ---

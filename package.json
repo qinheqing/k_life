@@ -15,13 +15,14 @@
     "pm2:status": "pm2 status"
   },
   "dependencies": {
-    "recharts": "^2.12.0",
+    "html2canvas": "1.4.1",
+    "jspdf": "2.5.1",
     "lucide-react": "^0.344.0",
-    "react-dom": "^18.3.1",
+    "lunar-javascript": "^1.7.7",
     "openai": "^4.73.0",
     "react": "^18.3.1",
-    "html2canvas": "1.4.1",
-    "jspdf": "2.5.1"
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

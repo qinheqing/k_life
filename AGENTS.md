@@ -67,19 +67,46 @@ No test framework is configured. When adding tests, first check for test command
 - Keep components focused - extract sub-components when logic gets complex
 
 ### AI Integration (services/aiService.ts)
+- **IMPORTANT**: BaZi calculation is now done locally in baziCalculator.ts, NOT by AI
 - Two-stage generation: `calculateBaZi()` → `generateDestinyAnalysis()`
+  - calculateBaZi(): Uses local baziCalculator for accurate pillar calculation
+  - generateDestinyAnalysis(): AI generates only fortune timeline and analysis
 - Support multiple providers via VITE_AI_PROVIDER ('deepseek' | 'glm')
 - Use environment variables: VITE_AI_API_KEY, VITE_AI_BASE_URL, VITE_AI_MODEL
 - Prompt engineering: Strict JSON schema, clear instructions
 - Data validation: Timeline must have exactly 100 entries starting from birth year
 - Single peak detection: Only one `isPeak: true` per timeline
 
+### BaZi Calculation (services/baziCalculator.ts)
+- Uses lunar-javascript library (v1.7.7) for precise calculations
+- Local calculation - NO AI involved for pillar determination
+- Functions:
+  - calculateBaZiLocal(): Returns pillars, lunarDate, solarTime, solarHour, startAge, direction, daYun
+  - Uses: Solar.fromYmdHms(), Lunar, getTimeGan(), getTimeZhi(), getDayGan(), etc.
+- Key lunar-javascript methods:
+  - getYearGan(), getYearZhi(): Year stem/branch
+  - getMonthGan(), getMonthZhi(): Month stem/branch
+  - getDayGan(), getDayZhi(): Day stem/branch
+  - getTimeGan(), getTimeZhi(): Hour stem/branch (based on solar time)
+  - getYearInGanZhi(): Full year stem-branch (e.g., "壬申"）
+
+### Solar Time Calculation (services/solarTime.ts)
+- Calculates true solar time (真太阳时) based on geolocation
+- Formula: True Solar Time = Mean Solar Time + Equation of Time + Longitude Correction
+- Equation of Time: Uses US Naval Observatory formula
+  - Range: approx -14 to +16 minutes
+- Longitude Correction: (local longitude - standard longitude) × 4 minutes
+  - Standard longitude for Beijing time: 120°E
+- Returns: solarTime, longitude, latitude, timezone, solarHour, lunarDate
+- Uses geolocation service (geoLocation.ts) to get coordinates from place name
+
 ### File Organization
 - `/components` - All React components
-- `/services` - External service integrations (AI)
+- `/services` - External service integrations (AI, BaZi calculation, solar time)
 - `/types.ts` - All TypeScript interfaces and enums
 - `/constants.ts` - App-wide constants (colors, app name)
 - `/locales.ts` - Bilingual translations (English/Chinese)
+- `/server` - Backend server for access code management
 - Root files: `App.tsx`, `index.tsx`, `index.css`
 
 ### Comments & Documentation
@@ -108,3 +135,53 @@ No test framework is configured. When adding tests, first check for test command
 - User can reset and start over from any step
 - Loading states shown during AI calls
 - Error handling triggers quota dialog for all API failures
+
+## Recent Improvements
+
+### True Solar Time & BaZi Calculation Optimization (Jan 2026)
+
+**Problems Fixed**:
+1. Incorrect lunar date calculation (showing "1992" instead of "壬申"）
+2. Inaccurate solar time calculation formula
+3. AI-generated BaZi pillars were unreliable
+
+**Solutions Implemented**:
+
+1. **Enhanced Solar Time Calculation** (services/solarTime.ts)
+   - Fixed time difference equation using US Naval Observatory formula
+   - Corrected longitude correction calculation
+   - Added proper lunar date formatting with gan-zhi year (干支纪年）
+   - Example: 1993-01-01 18:12 (Beijing) → True solar time: 17:51
+
+2. **Local BaZi Calculator** (services/baziCalculator.ts) ⭐ NEW
+   - Uses lunar-javascript library for precise calculations
+   - Calculates all four pillars locally, no AI involved
+   - Returns accurate results:
+     - Year Pillar: 壬申
+     - Month Pillar: 壬子
+     - Day Pillar: 壬午
+     - Hour Pillar: 己酉
+   - Calculates start age and fortune direction
+   - Generates 10 DaYun (大运）pillars
+
+3. **Updated AI Service** (services/aiService.ts)
+   - calculateBaZi() now uses local baziCalculator
+   - AI only generates fortune analysis, not BaZi calculation
+   - Eliminates AI hallucination risks
+   - Reduces API costs
+
+**Testing Results**:
+- Input: 1993-01-01 18:12, Beijing
+- True Solar Time: 17:51 (corrected by ~18 minutes)
+- Lunar Date: 壬申年腊月初九 (correct)
+- Time Pillar: 己酉 (accurate based on true solar time）
+
+**Files Added/Modified**:
+- ✅ New: services/baziCalculator.ts - Local BaZi calculation
+- ✅ New: services/solarTime.ts - Enhanced solar time calculation
+- ✅ New: services/geoLocation.ts - Geocoding service
+- ✅ Modified: services/aiService.ts - Uses local calculator
+- ✅ Modified: components/BaZiConfirmation.tsx - Updated display
+
+**Dependencies Added**:
+- lunar-javascript@1.7.7 - Professional lunar/BaZi calculation library

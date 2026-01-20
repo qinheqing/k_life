@@ -111,12 +111,38 @@ const BaZiConfirmation: React.FC<BaZiConfirmationProps> = ({ data, onConfirm, on
       </div>
 
       {/* Solar Time */}
-      <div className="bg-yellow-50 dark:bg-yellow-100 border border-yellow-100 dark:border-yellow-300 rounded-xl p-4 mb-6 flex items-center gap-3 transition-colors">
-        <Clock className="text-yellow-600 dark:text-yellow-700 w-5 h-5" />
-        <div>
-            <span className="font-bold text-slate-800 dark:text-gray-800 mr-2">{t.solarTime}: {data.solarTime}</span>
-            <span className="text-xs text-yellow-700 dark:text-yellow-800 opacity-80">(Used for Hour Pillar)</span>
-        </div>
+      <div className="bg-yellow-50 dark:bg-yellow-100 border border-yellow-100 dark:border-yellow-300 rounded-xl p-4 mb-6 transition-colors">
+         <div className="flex items-center gap-3 mb-3">
+            <Clock className="text-yellow-600 dark:text-yellow-700 w-5 h-5" />
+            <div className="font-bold text-slate-800 dark:text-gray-800">{t.solarTime}</div>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div className="bg-white dark:bg-white rounded-lg p-3 border border-yellow-200 dark:border-yellow-300">
+               <div className="text-xs text-gray-500 dark:text-gray-600 mb-1">原始时间</div>
+               <div className="font-semibold text-slate-700 dark:text-gray-800">{data.userInput.birthTime}</div>
+            </div>
+            <div className="bg-white dark:bg-white rounded-lg p-3 border border-yellow-200 dark:border-yellow-300">
+               <div className="text-xs text-gray-500 dark:text-gray-600 mb-1">真太阳时</div>
+               <div className="font-semibold text-yellow-700 dark:text-yellow-800">{data.solarTime}</div>
+            </div>
+            {data.originalSolarTime && (
+               <>
+                  <div className="bg-white dark:bg-white rounded-lg p-3 border border-yellow-200 dark:border-yellow-300">
+                     <div className="text-xs text-gray-500 dark:text-gray-600 mb-1">时辰</div>
+                     <div className="font-semibold text-slate-700 dark:text-gray-800">{data.originalSolarTime.solarHour}</div>
+                  </div>
+                  <div className="bg-white dark:bg-white rounded-lg p-3 border border-yellow-200 dark:border-yellow-300">
+                     <div className="text-xs text-gray-500 dark:text-gray-600 mb-1">经纬度</div>
+                     <div className="font-semibold text-slate-700 dark:text-gray-800 text-xs">
+                        {data.originalSolarTime.latitude.toFixed(2)}°N, {data.originalSolarTime.longitude.toFixed(2)}°E
+                     </div>
+                  </div>
+               </>
+            )}
+         </div>
+         <div className="mt-3 text-xs text-yellow-700 dark:text-yellow-800 opacity-90">
+            💡 真太阳时已根据出生地经纬度校正，用于确定准确的时辰
+         </div>
       </div>
 
       {/* Pillars */}

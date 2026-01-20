@@ -35,6 +35,13 @@ export interface BaZiResult {
   startAge: number; // Age the Da Yun starts
   direction: string; // Forward or Backward
   daYun: string[]; // List of Big Luck pillars (e.g. "甲子", "乙丑")
+  originalSolarTime?: {
+    solarTime: string;
+    longitude: number;
+    latitude: number;
+    timezone: string;
+    solarHour: string;
+  };
 }
 
 export interface YearlyFortune {
