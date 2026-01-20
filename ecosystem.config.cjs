@@ -1,6 +1,19 @@
 module.exports = {
   apps: [
     {
+      name: 'life-destiny-backend',
+      script: 'node',
+      args: 'server/server.js',
+      cwd: './',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3004
+      },
+      watch: false,
+      autorestart: true,
+      max_memory_restart: '500M'
+    },
+    {
       name: 'life-destiny-k-line',
       script: 'npm',
       args: 'run dev',

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Access Code Management</title>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span>Access Code Admin</span>
+        </div>
+        <button id="logoutBtn" class="btn-logout">Logout</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon total">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Total Codes</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon used">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Used</div>
+            <div class="stat-value" id="stat-used">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon unused">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Unused</div>
+            <div class="stat-value" id="stat-unused">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon rate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Usage Rate</div>
+            <div class="stat-value" id="stat-rate">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <div class="actions-left">
+          <button id="generateBtn" class="btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Generate Codes
+          </button>
+          <button id="exportBtn" class="btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export CSV
+          </button>
+        </div>
+        <div class="actions-right">
+          <select id="statusFilter" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="unused">Unused</option>
+            <option value="used">Used</option>
+          </select>
+          <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search codes...">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Code</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Used At</th>
+              <th>User</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="codesTableBody">
+            <tr>
+              <td colspan="7" class="loading">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination">
+        <button class="page-btn" id="prevPage" disabled>Previous</button>
+        <span class="page-info" id="pageInfo">Page 1</span>
+        <button class="page-btn" id="nextPage" disabled>Next</button>
+      </div>
+
+      <div class="logs-section">
+        <div class="logs-header">
+          <h3>Recent Logs</h3>
+          <button id="refreshLogsBtn" class="btn-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+        </div>
+        <div class="logs-container" id="logsContainer">
+          <div class="loading">Loading...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="generateModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Generate Access Codes</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="generateForm">
+        <div class="form-group">
+          <label for="genCount">Number of Codes</label>
+          <input type="number" id="genCount" name="count" min="1" max="1000" value="10" required>
+        </div>
+        <div class="form-group">
+          <label for="genLength">Code Length</label>
+          <input type="number" id="genLength" name="length" min="6" max="32" value="12" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary modal-cancel">Cancel</button>
+          <button type="submit" class="btn-primary">Generate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

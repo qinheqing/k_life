@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
+import AccessCodeForm from './components/AccessCodeForm';
 import InputForm from './components/InputForm';
 import BaZiDisplay from './components/BaZiDisplay';
 import BaZiConfirmation from './components/BaZiConfirmation';
@@ -9,11 +10,12 @@ import ApiQuotaDialog from './components/ApiQuotaDialog';
 import WeChatModal from './components/WeChatModal';
 import { UserInput, AnalysisResult, Language, BaZiResult } from './types';
 import { calculateBaZi, generateDestinyAnalysis } from './services/aiService';
+import { markCodeAsUsed } from './services/accessCodeService';
 import { Sparkles, Languages, Moon, Sun, MessageCircle } from 'lucide-react';
 import { getTexts } from './locales';
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<'landing' | 'input' | 'confirmation' | 'result'>('landing');
+  const [step, setStep] = useState<'landing' | 'code-entry' | 'input' | 'confirmation' | 'result'>('landing');
   const [loading, setLoading] = useState(false);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [showWeChatModal, setShowWeChatModal] = useState(false);
@@ -35,6 +37,7 @@ const App: React.FC = () => {
 
   const [preliminaryBaZi, setPreliminaryBaZi] = useState<BaZiResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [accessCode, setAccessCode] = useState<string | null>(null);
 
   const t = getTexts(lang);
 
@@ -79,6 +82,11 @@ const App: React.FC = () => {
     try {
       const result = await generateDestinyAnalysis(confirmedData, lang);
       setAnalysis(result);
+      
+      if (accessCode) {
+        await markCodeAsUsed(accessCode, confirmedData.userInput.name || 'Anonymous');
+      }
+      
       setStep('result');
     } catch (error: any) {
       console.error(error);
@@ -93,10 +101,17 @@ const App: React.FC = () => {
     setStep('landing');
     setPreliminaryBaZi(null);
     setAnalysis(null);
+    setAccessCode(null);
     window.scrollTo(0, 0);
   };
 
   const handleGetStarted = () => {
+    setStep('code-entry');
+    window.scrollTo(0, 0);
+  };
+
+  const handleAccessCodeVerified = (code: string) => {
+    setAccessCode(code);
     setStep('input');
     window.scrollTo(0, 0);
   };
@@ -219,6 +234,12 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-10 max-w-5xl">
+        {step === 'code-entry' && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
+            <AccessCodeForm onVerified={handleAccessCodeVerified} lang={lang} />
+          </div>
+        )}
+
         {step === 'input' && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
                 {/* Hero Section */}

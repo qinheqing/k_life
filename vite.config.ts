@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => {
         port: 3003,
         host: '0.0.0.0',
         allowedHosts: ['lifeline.undground.fun'],
+        proxy: {
+          '/api': {
+            target: env.VITE_BACKEND_URL || 'http://localhost:3004',
+            changeOrigin: true,
+          },
+        },
       },
       preview: {
         port: 3003,

@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "password": "admin123",
+    "sessionTimeout": 7200
+  },
+  "accessCode": {
+    "defaultLength": 12,
+    "defaultBatchSize": 10
+  }
+}
