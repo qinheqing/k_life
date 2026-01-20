@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import { UserInput, AnalysisResult, Language, BaZiResult } from "../types";
 import { calculateSolarTime, formatSolarTimeDifference } from "./solarTime";
 import { calculateBaZiLocal } from "./baziCalculator";
+import { analyzeBasicBaZi, BasicAnalysisResult, generatePersonalityAnalysis } from "./basicAnalysis";
+import { generateExtendedAnalysis, ExtendedAnalysisResult } from "./extendedAnalysis";
 
 // ------------------------------------------------------------------
 // 配置与环境变量
@@ -292,45 +294,79 @@ export const generateDestinyAnalysis = async (
     console.error("Error parsing birth year", e);
   }
 
+  // -----------------------------------------------------------------------
+  // 执行本地命理分析（确保基础分析的准确性和速度）
+  // -----------------------------------------------------------------------
+  let basicAnalysis: BasicAnalysisResult;
+  let extendedAnalysis: ExtendedAnalysisResult;
+  let personalityAnalysis: any;
+
+  console.log('🔍 开始本地基础命理分析...');
+  basicAnalysis = analyzeBasicBaZi(
+    confirmedBaZi.userInput.birthDate,
+    confirmedBaZi.userInput.birthTime,
+    confirmedBaZi.userInput.birthLocation
+  );
+  console.log('✅ 基础分析完成');
+
+  console.log('🔍 开始本地扩展命理分析...');
+  extendedAnalysis = generateExtendedAnalysis(basicAnalysis, confirmedBaZi.userInput);
+  console.log('✅ 扩展分析完成');
+
+  console.log('🔍 生成本地性格分析...');
+  personalityAnalysis = generatePersonalityAnalysis(basicAnalysis);
+  console.log('✅ 性格分析完成');
+
   const prompt = `
 ${analysisSchemaPrompt}
 
-**输入数据（用户已确认，不要重新计算，直接使用）：**
+**基础八字数据（用户已确认，不要重新计算，直接使用）：**
 - 八字：${baziString}
 - 性别：${confirmedBaZi.userInput.gender}
 - 大运：${daYunString}
 - 起运岁数：${confirmedBaZi.startAge}
 - 出生年份：${birthYear}
 
-**任务：**
-1. 基于提供的八字，分析用户的"人生股市"
+**本地精确分析数据（供AI参考，不要重新计算）：**
+- 命主属性：${basicAnalysis.dayElement}命（${basicAnalysis.shiShenAnalysis.dayMasterType}）
+- 日柱十神：${basicAnalysis.shiShenAnalysis.dayMasterShiShen}
+- 命主强弱：${basicAnalysis.strengthAnalysis.strengthDescription}
+- 事业潜力：${extendedAnalysis.careerAnalysis.careerScore}/10
+- 财富等级：${extendedAnalysis.wealthAnalysis.wealthLevel}/10
+- 婚姻评分：${extendedAnalysis.marriageAnalysis.marriageScore}/10
+- 健康等级：${extendedAnalysis.healthAnalysis.healthLevel}/10
+- 学习能力：${extendedAnalysis.educationAnalysis.learningAbility}/10
+
+**命主性格特征（本地生成供参考）：**
+${personalityAnalysis.content}
+
+**AI任务（基于本地精确数据生成高级分析）：**
+1. 综合本地分析数据，生成更详细的人生K线分析
 2. 生成100年运势数据（K线风格：Open, Close, High, Low 范围0-100）
    - timeline 必须恰好从出生年（${birthYear}）开始
    - 条目1：year=${birthYear}, age=1（虚岁）
-   - 条目2：year=${birthYear + 1}, age=2
-   - ...
    - 条目100：year=${birthYear + 99}, age=100
    - 确保数组恰好100个条目
-   - 注意：大运从${confirmedBaZi.startAge}岁开始，之前由月柱和小运决定
+   - 大运从${confirmedBaZi.startAge}岁开始
 
-3. **必须同时生成牛市年和熊市年**：
+3. **生成真实波动（重要）**：
    - 运势好的年份：Close > Open（绿色K线）
    - 运势差的年份：Close < Open（红色K线）
-   - 不要让所有年份都是绿色，要有真实的起伏波动
+   - **必须同时生成牛市年和熊市年，避免所有年份都相同**
 
-4. 对以下六大维度进行评分分析（1-10分）：
-   - 币圈/Web3交易运势
-   - 性格分析
-   - 事业与行业
-   - 发展风水
-   - 财富层级
-   - 婚姻情感
+4. 基于本地数据，对以下维度进行深化分析：
+   - 币圈/Web3交易运势（结合命主五行特征）
+   - 性格特征（结合十神分析）
+   - 事业与行业（结合事业分析数据）
+   - 发展风水（结合风水建议数据）
+   - 财富分析（结合财富分析数据）
+   - 婚姻情感（结合婚姻分析数据）
 
-5. 提供波动逻辑分析段落
+5. 提供波动逻辑解析，说明为什么运势会这样起伏
 
 **输出语言**：${langInstruction}
 
-只返回 JSON，不要其他内容。
+**重要**：基于本地分析的精确数据生成，不要重新计算基础命理信息。只返回 JSON，不要其他内容。
 `;
 
   try {

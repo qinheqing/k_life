@@ -414,6 +414,11 @@ const t = getTexts(lang);
 - **GLM（智谱AI）**：多种模型选择，快速响应
 - **多提供商架构**：通过 `VITE_AI_PROVIDER` 环境变量切换（deepseek/glm）
 
+#### 服务优化新增（2026年1月）
+- **basicAnalysis.ts**：基础分析服务，提供快速八字分析
+- **extendedAnalysis.ts**：扩展分析服务，提供深度人生运势分析
+- **本地化优化**：LOCALIZATION_REPORT.md 提供多语言支持报告
+
 #### 命理计算
 - **lunar-javascript 1.7.7**：专业的农历和八字计算库
   - 公历/农历转换
@@ -661,12 +666,14 @@ k_life/
  │   ├── InputForm.tsx        # 输入表单
  │   ├── KLineChart.tsx       # K 线图组件
  │   └── LandingPage.tsx      # 官网落地页
- ├── services/                # 服务层
- │   ├── aiService.ts         # AI 交互服务（DeepSeek/GLM 统一架构）
- │   ├── baziCalculator.ts    # 本地四柱计算器（lunar-javascript）
- │   ├── solarTime.ts         # 真太阳时计算服务
- │   ├── geoLocation.ts       # 地理位置编码服务
- │   └── geminiService.ts     # 旧版 Gemini 服务（已弃用，可删除）
+├── services/                # 服务层
+│   ├── aiService.ts         # AI 交互服务（DeepSeek/GLM 统一架构）
+│   ├── baziCalculator.ts    # 本地四柱计算器（lunar-javascript）
+│   ├── solarTime.ts         # 真太阳时计算服务
+│   ├── geoLocation.ts       # 地理位置编码服务
+│   ├── basicAnalysis.ts     # 基础分析服务
+│   ├── extendedAnalysis.ts  # 扩展分析服务
+│   └── geminiService.ts     # 旧版 Gemini 服务（已弃用，可删除）
  ├── doc/                     # 文档和图片资源（会被复制到 dist）
  ├── server/                  # 后端服务
  │   ├── routes/             # API 路由
@@ -684,10 +691,11 @@ k_life/
  ├── .env.example             # 环境变量配置示例
  ├── README.md                # 中文说明文档
  ├── README_en.md             # 英文说明文档
- ├── AI_MIGRATION_GUIDE.md    # AI 服务迁移指南
- ├── SOLAR_TIME_IMPROVEMENT.md # 真太阳时优化文档
- ├── AGENTS.md                # AI Agent 工作指南
- └── CLAUDE.md                # Claude Code 工作指南
+├── AI_MIGRATION_GUIDE.md    # AI 服务迁移指南
+├── SOLAR_TIME_IMPROVEMENT.md # 真太阳时优化文档
+├── LOCALIZATION_REPORT.md   # 本地化支持报告
+├── AGENTS.md                # AI Agent 工作指南
+└── CLAUDE.md                # Claude Code 工作指南
 ```
 
 ---

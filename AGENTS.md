@@ -102,7 +102,9 @@ No test framework is configured. When adding tests, first check for test command
 
 ### File Organization
 - `/components` - All React components
-- `/services` - External service integrations (AI, BaZi calculation, solar time)
+- `/services` - External service integrations (AI, BaZi calculation, solar time, analysis services)
+  - `basicAnalysis.ts` - Basic analysis service for quick BaZi insights
+  - `extendedAnalysis.ts` - Extended analysis service for deep fortune analysis
 - `/types.ts` - All TypeScript interfaces and enums
 - `/constants.ts` - App-wide constants (colors, app name)
 - `/locales.ts` - Bilingual translations (English/Chinese)
@@ -180,8 +182,36 @@ No test framework is configured. When adding tests, first check for test command
 - ✅ New: services/baziCalculator.ts - Local BaZi calculation
 - ✅ New: services/solarTime.ts - Enhanced solar time calculation
 - ✅ New: services/geoLocation.ts - Geocoding service
+- ✅ New: services/basicAnalysis.ts - Basic analysis service
+- ✅ New: services/extendedAnalysis.ts - Extended analysis service
+- ✅ New: LOCALIZATION_REPORT.md - Localization support documentation
 - ✅ Modified: services/aiService.ts - Uses local calculator
 - ✅ Modified: components/BaZiConfirmation.tsx - Updated display
 
 **Dependencies Added**:
 - lunar-javascript@1.7.7 - Professional lunar/BaZi calculation library
+
+### Analysis Service Enhancement (Jan 2026)
+
+**New Services Added**:
+
+1. **basicAnalysis.ts** - Quick Analysis Service
+   - Provides rapid BaZi insights for users who want quick results
+   - Lightweight analysis with essential fortune information
+   - Faster response times for basic queries
+
+2. **extendedAnalysis.ts** - Deep Analysis Service  
+   - Comprehensive fortune analysis with detailed insights
+   - Advanced algorithms for more accurate predictions
+   - Suitable for users seeking in-depth life guidance
+
+3. **LOCALIZATION_REPORT.md** - Internationalization Documentation
+   - Complete report on multilingual support capabilities
+   - Language-specific optimization guidelines
+   - Translation workflow and best practices
+
+**Benefits**:
+- Flexible analysis options for different user needs
+- Improved performance through service specialization
+- Better internationalization support
+- Enhanced user experience with choice of analysis depth
