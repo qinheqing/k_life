@@ -28,24 +28,24 @@ export const translations = {
     month: "Month",
     day: "Day",
     hour: "Hour",
-    klineTitle: "100-Year Life Fortune Trend", 
+    klineTitle: "100-Year Life Fortune Trend",
     klineSubtitle: "Green = Rising Luck (Good), Red = Falling Luck (Bad). ★ = Peak Fortune.",
     volatilityAnalysis: "Volatility Logic Analysis",
     bullMarket: "Good Luck (Rise)",
     bearMarket: "Bad Luck (Fall)",
     overviewTitle: "Destiny Overview",
-    
-    // New Section Titles
-    cryptoTitle: "Crypto & Web3 Trading",
+
+    geographicTitle: "Geographical Development",
+    geographicSubtitle: "Recommended locations for your career success",
     personalityTitle: "Personality Analysis",
     careerTitle: "Career & Industry",
     fengShuiTitle: "Development Feng Shui",
     wealthTitle: "Wealth Level",
     marriageTitle: "Marriage & Emotion",
     rating: "RATING",
-    
+
     yearlyReviewTitle: "Annual Detailed Review",
-    
+
     savePdf: "Save Report as PDF",
     newReading: "New Reading",
     footer: "@heqing",
@@ -54,7 +54,7 @@ export const translations = {
     high: "High",
     low: "Low",
     ath: "PEAK 👑",
-    // Confirmation Screen
+
     confirmTitle: "BaZi Calculation Complete",
     confirmSubtitle: "Please verify the chart below. Click 'Confirm' if correct.",
     birthInfo: "Birth Information",
@@ -67,7 +67,42 @@ export const translations = {
     confirmTip: "Calculated based on True Solar Time. If in doubt, check your birth certificate.",
     virtualAge: "(Virtual Age)",
     forward: "Forward",
-    backward: "Backward"
+    backward: "Backward",
+
+    expandDetails: "Expand Details",
+    collapseDetails: "Collapse",
+    tabOverview: "Overview",
+    tabStrengths: "Strengths",
+    tabWeaknesses: "Weaknesses",
+    tabRecommendations: "Recommendations",
+    tabTaboos: "Taboos",
+
+    career: "Career",
+    wealth: "Wealth",
+    health: "Health",
+    advice: "Advice",
+    luckyColor: "Lucky Color",
+    luckyNumber: "Lucky Number",
+    bestTiming: "Best Timing",
+
+    recommendedDirection: "Recommended Direction",
+    cityTypes: "City Types",
+    migrationTiming: "Migration Timing",
+    workplaceArrangement: "Workplace Arrangement",
+
+    keyYear: "Key Year",
+    allYears: "All Years",
+    keyOnly: "Key Years Only",
+    bullOnly: "Bull Years Only",
+
+    briefReview: "Brief Review",
+
+    progressStep1: "Analyzing Basic BaZi...",
+    progressStep2: "Analyzing Extended BaZi...",
+    progressStep3: "Analyzing Personality...",
+    progressStep4: "AI Generating Full Analysis...",
+    progressStep5: "Validating Data...",
+    progressComplete: "Analysis Complete"
   },
   zh: {
     appTitle: "人生预览",
@@ -102,18 +137,18 @@ export const translations = {
     bullMarket: "运势上涨 (吉)",
     bearMarket: "运势下跌 (凶)",
     overviewTitle: "命运总览",
-    
-    // New Section Titles
-    cryptoTitle: "币圈与Web3交易运势",
+
+    geographicTitle: "地理发展方向",
+    geographicSubtitle: "结合命理推荐适合发展的地理方位",
     personalityTitle: "性格分析",
     careerTitle: "事业与行业",
     fengShuiTitle: "发展风水建议",
     wealthTitle: "财富层级",
     marriageTitle: "婚姻与情感",
     rating: "评分",
-    
+
     yearlyReviewTitle: "流年详细点评",
-    
+
     savePdf: "保存 PDF 报告",
     newReading: "重新测试",
     footer: "@heqing",
@@ -122,9 +157,9 @@ export const translations = {
     high: "最高",
     low: "最低",
     ath: "人生巅峰 👑",
-    // Confirmation Screen
+
     confirmTitle: "八字排盘完成",
-    confirmSubtitle: "请确认以下信息是否准确。如有误可修改，确认无误后点击“开始AI分析”。",
+    confirmSubtitle: "请确认以下信息是否准确。如有误可修改，确认无误后点击开始AI分析。",
     birthInfo: "出生信息",
     solarTime: "真太阳时",
     daYun: "大运",
@@ -135,7 +170,42 @@ export const translations = {
     confirmTip: "已根据出生地经纬度校正为真太阳时。如与记忆不符，请以出生证明为准。",
     virtualAge: "(虚岁)",
     forward: "顺行",
-    backward: "逆行"
+    backward: "逆行",
+
+    expandDetails: "展开详情",
+    collapseDetails: "收起",
+    tabOverview: "概述",
+    tabStrengths: "优势",
+    tabWeaknesses: "劣势",
+    tabRecommendations: "建议",
+    tabTaboos: "禁忌",
+
+    career: "事业",
+    wealth: "财运",
+    health: "健康",
+    advice: "建议",
+    luckyColor: "幸运色",
+    luckyNumber: "幸运数",
+    bestTiming: "最佳时机",
+
+    recommendedDirection: "推荐方位",
+    cityTypes: "城市类型",
+    migrationTiming: "迁移时机",
+    workplaceArrangement: "工作环境建议",
+
+    keyYear: "关键年",
+    allYears: "全部年份",
+    keyOnly: "仅关键年",
+    bullOnly: "仅牛市年",
+
+    briefReview: "简短点评",
+
+    progressStep1: "正在分析基础命理信息...",
+    progressStep2: "正在分析扩展命理信息...",
+    progressStep3: "正在分析性格特征...",
+    progressStep4: "AI 正在生成完整分析...",
+    progressStep5: "正在验证数据完整性...",
+    progressComplete: "分析完成"
   }
 };
 

@@ -8,17 +8,24 @@ import KLineChart from './components/KLineChart';
 import AnalysisSection from './components/AnalysisSection';
 import ApiQuotaDialog from './components/ApiQuotaDialog';
 import WeChatModal from './components/WeChatModal';
+import ProgressBar from './components/ProgressBar';
 import { UserInput, AnalysisResult, Language, BaZiResult } from './types';
 import { calculateBaZi, generateDestinyAnalysis } from './services/aiService';
 import { markCodeAsUsed } from './services/accessCodeService';
 import { Sparkles, Languages, Moon, Sun, MessageCircle } from 'lucide-react';
 import { getTexts } from './locales';
 
+type ErrorType = 'network' | 'timeout' | 'quota' | 'server' | 'unknown';
+
 const App: React.FC = () => {
   const [step, setStep] = useState<'landing' | 'code-entry' | 'input' | 'confirmation' | 'result'>('landing');
   const [loading, setLoading] = useState(false);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [showWeChatModal, setShowWeChatModal] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [progressStep, setProgressStep] = useState<string>('');
+  const [estimatedTime, setEstimatedTime] = useState<number | undefined>(undefined);
+  const [errorType, setErrorType] = useState<ErrorType>('unknown');
 
   // Theme State
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -60,6 +67,33 @@ const App: React.FC = () => {
     setLang(prev => prev === 'en' ? 'zh' : 'en');
   };
 
+  const detectErrorType = (error: any): ErrorType => {
+    const errorMessage = error?.message?.toLowerCase() || '';
+    const errorString = error?.toString().toLowerCase() || '';
+
+    if (errorMessage.includes('quota') || errorMessage.includes('rate limit') || 
+        errorMessage.includes('429') || errorMessage.includes('insufficient quota') ||
+        errorMessage.includes('balance insufficient')) {
+      return 'quota';
+    }
+
+    if (errorMessage.includes('timeout') || errorMessage.includes('etimeout') ||
+        errorMessage.includes('network error') || errorMessage.includes('failed to fetch')) {
+      return 'network';
+    }
+
+    if (errorMessage.includes('500') || errorMessage.includes('502') || 
+        errorMessage.includes('503') || errorMessage.includes('504')) {
+      return 'server';
+    }
+
+    if (errorMessage.includes('timeout') && errorMessage.includes('etime')) {
+      return 'timeout';
+    }
+
+    return 'unknown';
+  };
+
   // Step 1: Calculate BaZi
   const handleInitialSubmit = async (data: UserInput) => {
     setLoading(true);
@@ -79,8 +113,18 @@ const App: React.FC = () => {
   // Step 2: Confirm BaZi and Generate K-Line
   const handleBaZiConfirm = async (confirmedData: BaZiResult) => {
     setLoading(true);
+    setProgress(0);
+    setProgressStep('');
+    setEstimatedTime(undefined);
+    setErrorType('unknown');
+    
     try {
-      const result = await generateDestinyAnalysis(confirmedData, lang);
+      const result = await generateDestinyAnalysis(confirmedData, lang, (progressValue, stepText, time) => {
+        setProgress(progressValue);
+        setProgressStep(stepText);
+        setEstimatedTime(time);
+      });
+      
       setAnalysis(result);
       
       if (accessCode) {
@@ -89,11 +133,15 @@ const App: React.FC = () => {
       
       setStep('result');
     } catch (error: any) {
-      console.error(error);
-      // Show quota dialog for all API errors
+      console.error('分析失败:', error);
+      const detectedErrorType = detectErrorType(error);
+      setErrorType(detectedErrorType);
       setShowQuotaDialog(true);
     } finally {
       setLoading(false);
+      setProgress(0);
+      setProgressStep('');
+      setEstimatedTime(undefined);
     }
   };
 
@@ -288,6 +336,17 @@ const App: React.FC = () => {
         )}
       </main>
 
+      {/* Progress Bar */}
+      {loading && step === 'confirmation' && (
+        <ProgressBar
+          progress={progress}
+          step={progressStep}
+          estimatedTime={estimatedTime}
+          lang={lang}
+          theme={theme}
+        />
+      )}
+
       {/* Simple Footer */}
       <footer className="bg-white dark:bg-white border-t border-gray-100 dark:border-amber-200 py-6 mt-auto print:hidden transition-colors duration-200" data-html2canvas-ignore="true">
         <div className="max-w-5xl mx-auto px-4 text-center text-gray-400 dark:text-gray-500 text-sm transition-colors duration-200">
@@ -300,6 +359,7 @@ const App: React.FC = () => {
         isOpen={showQuotaDialog}
         onClose={() => setShowQuotaDialog(false)}
         lang={lang}
+        errorType={errorType}
       />
 
       {/* WeChat Modal */}

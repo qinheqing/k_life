@@ -2,6 +2,30 @@
 
 This file guides AI agents working on this Life K-Line codebase.
 
+## Proxy Configuration
+
+**IMPORTANT**: Only use proxy for Git and Docker operations. Frontend and backend servers do NOT require proxy.
+
+```bash
+# Git operations with proxy
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 && git pull --rebase
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 && git push
+
+# Docker operations with proxy
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 && docker pull <image>
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 && docker build -t <tag> .
+
+# Frontend/Backend servers: NO proxy needed
+npm run dev                    # Frontend (port 3003)
+npm run build                  # Build frontend
+npm run preview                # Preview frontend build
+cd server && npm start          # Backend (port 3004)
+```
+
+**Proxy Details**:
+- HTTP/HTTPS: `http://127.0.0.1:7890`
+- SOCKS5: `socks5://127.0.0.1:7890`
+
 ## Development Commands
 
 ### Core Commands
@@ -215,3 +239,95 @@ No test framework is configured. When adding tests, first check for test command
 - Improved performance through service specialization
 - Better internationalization support
 - Enhanced user experience with choice of analysis depth
+
+### AI Service Optimization - Multi-Stage Architecture (Jan 2026)
+
+**Problems Fixed**:
+1. Single AI call with 9,000+ tokens causing timeout and quota issues
+2. No visibility into analysis progress during AI generation
+3. All errors treated equally, no granular error handling
+4. Geographic development card expansion causing page crash
+5. English text appearing in Chinese analysis results
+
+**Solutions Implemented**:
+
+1. **Multi-Stage AI Calling** (services/aiService.ts)
+   - Split single AI call into 8 independent calls:
+     - Call 1: Main Attribute & General Overview (35-40% progress)
+     - Call 2: Geographic Development (40-50% progress)
+     - Call 3: Personality Analysis (50-60% progress)
+     - Call 4: Career Analysis (60-70% progress)
+     - Call 5: Feng Shui Analysis (70-80% progress)
+     - Call 6: Wealth Analysis (80-90% progress)
+     - Call 7: Marriage Analysis (90-95% progress)
+     - Call 8: 100-Year Timeline (95-100% progress)
+   - Each call has 1,000-6,000 tokens (vs 9,000 before)
+   - Reduces single call pressure and avoids max_tokens limit
+
+2. **Intelligent Retry Mechanism** (services/aiService.ts:338-384)
+   - `callAIWithRetry()` function with automatic retry (max 3 times)
+   - 1-2 second wait between retries with randomization
+   - Quota exhausted errors (429, rate limit) - no retry, immediate stop
+   - Network/temporary errors - retry 3 times
+   - Detailed logging for each attempt
+
+3. **Progress Bar Enhancement** (components/ProgressBar.tsx)
+   - New ProgressBar component with real-time updates
+   - Progress steps: 10% → 20% → 30% → 35% → 40% → 50% → 60% → 70% → 80% → 90% → 95% → 100%
+   - Each dimension completion clearly visible
+   - Estimated remaining time display
+   - Dynamic progress tracking during AI calls
+
+4. **Granular Error Handling** (App.tsx, components/ApiQuotaDialog.tsx)
+   - 5 error types: network, timeout, quota, server, unknown
+   - `detectErrorType()` function for automatic classification
+   - Different icons and messages for each error type:
+     - Network: "网络连接失败" + Check network connection
+     - Timeout: "请求超时" + Try again later
+     - Server: "服务器错误" + We are fixing it
+     - Quota: "API额度暂时耗尽" + Will restore soon
+     - Unknown: "分析失败" + Contact support
+
+5. **Fixed Geographic Development Display Bug** (components/AnalysisSection.tsx:528-534)
+   - Changed from `ExpandableDetailCard` to `GeographicCard`
+   - GeographicCard correctly expects `GeographicalAnalysis` data structure
+   - No more page crashes when expanding details
+
+6. **Forced Chinese Output** (services/aiService.ts)
+   - Modified all 8 prompt generators to force Chinese output
+   - Removed `lang === 'zh' ? '简体中文' : 'English'` logic
+   - Added explicit requirement: "所有输出内容必须使用**简体中文**，不要出现英文"
+   - Ensures no English text appears in Chinese analysis
+
+**Progress Flow**:
+```
+0%   10%   20%   30%   35%   40%   50%   60%   70%   80%   90%   95%  100%
+│    │     │     │     │     │     │     │     │     │     │     │    │
+├─►  ├─►   ├─►   ├─►   ├─►   ├─►   ├─►   ├─►   ├─►   ├─►   ├─►  ├─►
+本地  本地   本地   AI1   AI2   AI3   AI4   AI5   AI6   AI7   AI8  数据
+基础  扩展   性格   命主  地理   性格  事业  风水  财富  婚姻  时间  清洗
+分析  分析   分析   总述  发展   分析  分析  分析  分析  分析  线   验证
+```
+
+**Benefits**:
+- ✅ Progress visibility improved from 40% (single step) to 12 distinct stages
+- ✅ Token pressure reduced from ~9,000 to 1,000-6,000 per call
+- ✅ Automatic retry for temporary failures, improving success rate
+- ✅ Better error diagnosis helps users understand what went wrong
+- ✅ Geographic development card now works correctly
+- ✅ All Chinese analysis results guaranteed
+
+**Cost Impact**:
+- AI calls: 1 → 8 (7x increase)
+- Cost: ~5-7x original (but offset by higher success rate and better UX)
+
+**Files Modified**:
+- ✅ Modified: services/aiService.ts - Multi-stage architecture, retry mechanism
+- ✅ Modified: components/AnalysisSection.tsx - Fixed GeographicCard usage
+- ✅ Modified: components/ApiQuotaDialog.tsx - Added error type support
+- ✅ Modified: App.tsx - Added detectErrorType(), errorType state
+- ✅ New: components/ProgressBar.tsx - New progress display component
+- ✅ Modified: types.ts - Updated ErrorType
+
+**Dependencies**:
+- No new dependencies required

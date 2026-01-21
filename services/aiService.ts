@@ -6,6 +6,12 @@ import { analyzeBasicBaZi, BasicAnalysisResult, generatePersonalityAnalysis } fr
 import { generateExtendedAnalysis, ExtendedAnalysisResult } from "./extendedAnalysis";
 
 // ------------------------------------------------------------------
+// 进度回调类型定义
+// ------------------------------------------------------------------
+
+export type ProgressCallback = (progress: number, step: string, estimatedTime?: number) => void;
+
+// ------------------------------------------------------------------
 // 配置与环境变量
 // ------------------------------------------------------------------
 
@@ -103,63 +109,172 @@ const baziCalculationSchemaPrompt = `
 只返回 JSON，不要任何其他解释文字。
 `;
 
-const analysisSchemaPrompt = `
-你是一个八字大师和金融分析师。请根据确认的八字信息，生成人生K线分析，返回 ONLY 符合以下 JSON 格式的结果（不要 markdown，不要代码块）：
+const createMainAttributePrompt = (
+  lang: string,
+  baziString: string,
+  daYunString: string,
+  startAge: number,
+  dayElement: string,
+  dayMasterType: string,
+  strengthDescription: string
+) => `
+你是一个八字命理专家。根据以下八字信息生成命主属性和总述：
 
+**八字信息：**
+- 八字四柱：${baziString}
+- 大运：${daYunString}
+- 起运岁数：${startAge}
+- 命主属性：${dayElement}命（${dayMasterType}）
+- 命主强弱：${strengthDescription}
+
+返回 ONLY 符合以下 JSON 格式：
 {
-  "mainAttribute": "字符串 - 命主属性，例如'弱火命'、'强金命'",
-  "generalComment": "字符串 - 命运总述，2-3句话",
-  "cryptoFortune": {
-    "content": "字符串 - 币圈/Web3交易运势分析",
-    "rating": "整数 - 评分1-10"
+  "mainAttribute": "字符串 - 命主属性，如'弱火命'、'强金命'",
+  "generalComment": "字符串 - 命运总述，3-4句话，100-150字"
+}
+
+重要要求：所有输出内容必须使用**简体中文**，不要出现英文。
+
+只返回 JSON，不要其他内容。
+`;
+
+const createGeographicPrompt = (
+  lang: string,
+  dayElement: string,
+  favorableElements: string,
+  favorableDirections: string
+) => `
+你是一个八字命理专家。根据以下信息生成地理发展建议：
+
+**八字信息：**
+- 命主属性：${dayElement}命
+- 喜用五行：${favorableElements}
+- 有利方位：${favorableDirections}
+
+返回 ONLY 符合以下 JSON 格式：
+{
+  "recommendedDirections": {
+    "primary": "字符串 - 主要推荐方位（南方、北方、东方、西方、中央）",
+    "secondary": "字符串 - 次要推荐方位",
+    "description": "字符串 - 方位详细解释，结合五行理论，100-150字"
   },
-  "personality": {
-    "content": "字符串 - 性格分析",
-    "rating": "整数 - 评分1-10"
+  "recommendedCityTypes": {
+    "types": ["字符串数组 - 推荐城市类型3-5个，如['一线城市', '沿海城市']"],
+    "examples": ["字符串数组 - 示例城市3-5个，如['深圳', '上海', '杭州']"],
+    "description": "字符串 - 城市类型详细解释，结合产业发展，150-200字"
   },
-  "career": {
-    "content": "字符串 - 事业与行业分析",
-    "rating": "整数 - 评分1-10"
+  "migrationAdvice": {
+    "timing": "字符串 - 最佳迁移时机，50字左右",
+    "preparation": ["字符串数组 - 准备工作2-3条"],
+    "considerations": ["字符串数组 - 注意事项2-3条"]
   },
-  "fengShui": {
-    "content": "字符串 - 发展风水建议",
-    "rating": "整数 - 评分1-10"
-  },
-  "wealth": {
-    "content": "字符串 - 财富层级分析",
-    "rating": "整数 - 评分1-10"
-  },
-  "marriage": {
-    "content": "字符串 - 婚姻情感分析",
-    "rating": "整数 - 评分1-10"
-  },
-  "volatilityAnalysis": "字符串 - K线波动逻辑解析，解释为什么运势会这样起伏",
+  "workplaceArrangement": "字符串 - 工作环境建议，80-100字",
+  "rating": "整数 - 整体评分1-10"
+}
+
+重要要求：所有输出内容必须使用**简体中文**，不要出现英文。
+
+只返回 JSON。
+`;
+
+const createDimensionPrompt = (
+  dimension: string,
+  lang: string,
+  localData: Record<string, any>
+) => {
+  const dimensionPrompts: Record<string, string> = {
+    性格: '性格特征分析',
+    事业: '事业发展分析',
+    风水: '风水运势分析',
+    财富: '财富运势分析',
+    婚姻: '婚姻情感分析'
+  };
+
+  const description = dimensionPrompts[dimension] || dimension;
+
+  return `
+你是一个八字命理专家。生成${description}：
+
+**参考数据：**
+${JSON.stringify(localData, null, 2)}
+
+返回 ONLY 符合以下 JSON 格式：
+{
+  "summary": "字符串 - 精简概括，50-80字",
+  "rating": "整数 - 评分1-10",
+  "details": {
+    "overview": "字符串 - 总体概述，100-150字",
+    "strengths": ["数组 - 优势3-4条，每条50字左右"],
+    "weaknesses": ["数组 - 劣势2-3条，每条50字左右"],
+    "recommendations": ["数组 - 建议4-5条，每条50字左右"],
+    "taboos": ["数组 - 注意事项2-3条，每条40字左右"],
+    "bestTiming": "字符串 - 最佳时机，50字左右"
+  }
+}
+
+重要要求：所有输出内容必须使用**简体中文**，不要出现英文。
+
+只返回 JSON。
+`;
+};
+
+const createTimelinePrompt = (
+  lang: string,
+  birthYear: number,
+  startAge: number,
+  dayElement: string
+) => `
+你是一个八字大师和金融分析师。生成100年人生K线：
+
+**基础信息：**
+- 出生年份：${birthYear}
+- 起运岁数：${startAge}
+- 命主属性：${dayElement}命
+
+返回 ONLY 符合以下 JSON 格式：
+{
   "timeline": [
     {
-      "year": "整数 - 公历年份（例如2002）",
-      "age": "整数 - 虚岁（例如1）",
-      "open": "整数 - 开盘值 0-100",
-      "close": "整数 - 收盘值 0-100",
-      "high": "整数 - 最高值 0-100",
-      "low": "整数 - 最低值 0-100",
-      "summary": "字符串 - 年度简短总结",
-      "detailedReview": "字符串 - 年度详细点评，1-2句话",
-      "isPeak": "布尔值 - 大多数年份为false"
+      "year": "整数 - 公历年份",
+      "age": "整数 - 虚岁",
+      "open": "整数 - 开盘值0-100",
+      "close": "整数 - 收盘值0-100",
+      "high": "整数 - 最高值0-100",
+      "low": "整数 - 最低值0-100",
+      "summary": "字符串 - 年度总结，30-50字",
+      "isKeyYear": "布尔值 - 是否关键年份",
+      "yearlyReview": {
+        "brief": "字符串 - 普通年份简评，<100字",
+        "detailed": {
+          "career": "字符串 - 关键年份事业，100字左右",
+          "wealth": "字符串 - 关键年份财运，80字左右",
+          "health": "字符串 - 关键年份健康，80字左右",
+          "advice": "字符串 - 关键年份建议，40字左右",
+          "luckyColor": "字符串 - 幸运色（可选，仅关键年份）",
+          "luckyNumber": "整数 - 幸运数字（可选，仅关键年份）"
+        }
+      }
     }
   ]
 }
 
-重要要求：
-1. timeline 数组必须包含**恰好100个条目**，从出生年开始
-2. 条目1：year = 出生年, age = 1
-3. 条目100：year = 出生年+99, age = 100
-4. 必须同时生成牛市年（close > open，绿色K线）和熊市年（close < open，红色K线）
-5. 不要让所有年份都是绿色，要有真实的波动
-6. 大运在起运岁数开始，之前由月柱和小运决定
-7. 评分要客观合理，1-10分
-8. 内容要基于八字理论分析
+要求：
+1. 恰好100个条目，从出生年到出生年+99
+2. 条目1：year = ${birthYear}, age = 1
+3. 条目100：year = ${birthYear + 99}, age = 100
+4. 必须同时生成牛市年（Close > Open，绿色K线）和熊市年（Close < Open，红色K线）
+5. 关键年份占15-20%：
+   - 人生巅峰年份（最高high的年份）
+   - 运势大幅波动年份（涨跌 > 30）
+   - 大运开始的年份（${birthYear + startAge}年）
+   - 流年与命盘有冲、合、害等特殊关系的年份
+6. 关键年份：yearlyReview.detailed有内容，yearlyReview.brief也要有
+7. 普通年份：只保留yearlyReview.brief，detailed为null
+8. 评分要客观合理，基于八字理论
 
-只返回 JSON，不要任何其他解释文字。
+重要要求：所有输出内容必须使用**简体中文**，不要出现英文（如"Career"、"Wealth"等）。
+
+只返回 JSON。
 `;
 
 // ------------------------------------------------------------------
@@ -203,6 +318,56 @@ async function callAI(prompt: string, systemPrompt?: string): Promise<any> {
 
     throw error;
   }
+}
+
+/**
+ * 带重试的AI调用
+ * @param prompt - 提示词
+ * @param description - 用于日志和进度描述
+ * @param maxRetries - 最大重试次数（默认3）
+ * @param progressCallback - 进度回调（可选）
+ */
+async function callAIWithRetry(
+  prompt: string,
+  description: string,
+  maxRetries: number = 3,
+  progressCallback?: ProgressCallback
+): Promise<any> {
+  let lastError: any;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🤖 AI调用 [${description}] - 尝试 ${attempt}/${maxRetries}`);
+
+      const result = await callAI(prompt);
+
+      if (attempt > 1) {
+        console.log(`✅ AI调用 [${description}] - 重试成功 (尝试 ${attempt})`);
+      }
+
+      return result;
+    } catch (error: any) {
+      lastError = error;
+      console.error(`❌ AI调用 [${description}] - 尝试 ${attempt} 失败:`, error.message);
+
+      // 如果是配额耗尽，立即抛出，不重试
+      if (isQuotaExhaustedError(error)) {
+        throw new Error("QUOTA_EXHAUSTED");
+      }
+
+      // 如果是最后一次尝试，抛出错误
+      if (attempt === maxRetries) {
+        throw new Error(`${description} 失败（已重试${maxRetries}次）: ${error.message}`);
+      }
+
+      // 等待1-2秒后重试
+      const waitTime = 1000 + Math.random() * 1000;
+      console.log(`⏳ ${waitTime.toFixed(0)}ms后重试...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+
+  throw lastError;
 }
 
 // ------------------------------------------------------------------
@@ -280,7 +445,8 @@ export const calculateBaZi = async (input: UserInput): Promise<BaZiResult> => {
 
 export const generateDestinyAnalysis = async (
   confirmedBaZi: BaZiResult,
-  lang: Language = 'zh'
+  lang: Language = 'zh',
+  progressCallback?: ProgressCallback
 ): Promise<AnalysisResult> => {
   const langInstruction = lang === 'zh' ? '简体中文' : 'English';
 
@@ -294,6 +460,25 @@ export const generateDestinyAnalysis = async (
     console.error("Error parsing birth year", e);
   }
 
+  const getProgressText = (key: string): string => {
+    const progressTexts: Record<string, { zh: string; en: string }> = {
+      step1: { zh: '正在分析基础命理信息...', en: 'Analyzing Basic BaZi...' },
+      step2: { zh: '正在分析扩展命理信息...', en: 'Analyzing Extended BaZi...' },
+      step3: { zh: '正在分析性格特征...', en: 'Analyzing Personality...' },
+      step4: { zh: 'AI 正在生成命主总述...', en: 'AI Generating Main Attribute...' },
+      step5: { zh: 'AI 正在分析地理发展...', en: 'AI Analyzing Geographic...' },
+      step6: { zh: 'AI 正在分析性格分析...', en: 'AI Analyzing Personality...' },
+      step7: { zh: 'AI 正在分析事业发展...', en: 'AI Analyzing Career...' },
+      step8: { zh: 'AI 正在分析风水运势...', en: 'AI Analyzing Feng Shui...' },
+      step9: { zh: 'AI 正在分析财富运势...', en: 'AI Analyzing Wealth...' },
+      step10: { zh: 'AI 正在分析婚姻运势...', en: 'AI Analyzing Marriage...' },
+      step11: { zh: 'AI 正在生成人生K线...', en: 'AI Generating Timeline...' },
+      step12: { zh: '正在合并分析结果...', en: 'Merging Results...' },
+      complete: { zh: '分析完成', en: 'Analysis Complete' },
+    };
+    return progressTexts[key]?.[lang] || key;
+  };
+
   // -----------------------------------------------------------------------
   // 执行本地命理分析（确保基础分析的准确性和速度）
   // -----------------------------------------------------------------------
@@ -302,6 +487,9 @@ export const generateDestinyAnalysis = async (
   let personalityAnalysis: any;
 
   console.log('🔍 开始本地基础命理分析...');
+  if (progressCallback) {
+    progressCallback(10, getProgressText('step1'), 20);
+  }
   basicAnalysis = analyzeBasicBaZi(
     confirmedBaZi.userInput.birthDate,
     confirmedBaZi.userInput.birthTime,
@@ -310,79 +498,231 @@ export const generateDestinyAnalysis = async (
   console.log('✅ 基础分析完成');
 
   console.log('🔍 开始本地扩展命理分析...');
+  if (progressCallback) {
+    progressCallback(20, getProgressText('step2'), 18);
+  }
   extendedAnalysis = generateExtendedAnalysis(basicAnalysis, confirmedBaZi.userInput);
   console.log('✅ 扩展分析完成');
 
   console.log('🔍 生成本地性格分析...');
+  if (progressCallback) {
+    progressCallback(30, getProgressText('step3'), 17);
+  }
   personalityAnalysis = generatePersonalityAnalysis(basicAnalysis);
   console.log('✅ 性格分析完成');
 
-  const prompt = `
-${analysisSchemaPrompt}
+  // -----------------------------------------------------------------------
+  // AI调用阶段 - 7次独立调用 (35-95%)
+  // -----------------------------------------------------------------------
 
-**基础八字数据（用户已确认，不要重新计算，直接使用）：**
-- 八字：${baziString}
-- 性别：${confirmedBaZi.userInput.gender}
-- 大运：${daYunString}
-- 起运岁数：${confirmedBaZi.startAge}
-- 出生年份：${birthYear}
-
-**本地精确分析数据（供AI参考，不要重新计算）：**
-- 命主属性：${basicAnalysis.dayElement}命（${basicAnalysis.shiShenAnalysis.dayMasterType}）
-- 日柱十神：${basicAnalysis.shiShenAnalysis.dayMasterShiShen}
-- 命主强弱：${basicAnalysis.strengthAnalysis.strengthDescription}
-- 事业潜力：${extendedAnalysis.careerAnalysis.careerScore}/10
-- 财富等级：${extendedAnalysis.wealthAnalysis.wealthLevel}/10
-- 婚姻评分：${extendedAnalysis.marriageAnalysis.marriageScore}/10
-- 健康等级：${extendedAnalysis.healthAnalysis.healthLevel}/10
-- 学习能力：${extendedAnalysis.educationAnalysis.learningAbility}/10
-
-**命主性格特征（本地生成供参考）：**
-${personalityAnalysis.content}
-
-**AI任务（基于本地精确数据生成高级分析）：**
-1. 综合本地分析数据，生成更详细的人生K线分析
-2. 生成100年运势数据（K线风格：Open, Close, High, Low 范围0-100）
-   - timeline 必须恰好从出生年（${birthYear}）开始
-   - 条目1：year=${birthYear}, age=1（虚岁）
-   - 条目100：year=${birthYear + 99}, age=100
-   - 确保数组恰好100个条目
-   - 大运从${confirmedBaZi.startAge}岁开始
-
-3. **生成真实波动（重要）**：
-   - 运势好的年份：Close > Open（绿色K线）
-   - 运势差的年份：Close < Open（红色K线）
-   - **必须同时生成牛市年和熊市年，避免所有年份都相同**
-
-4. 基于本地数据，对以下维度进行深化分析：
-   - 币圈/Web3交易运势（结合命主五行特征）
-   - 性格特征（结合十神分析）
-   - 事业与行业（结合事业分析数据）
-   - 发展风水（结合风水建议数据）
-   - 财富分析（结合财富分析数据）
-   - 婚姻情感（结合婚姻分析数据）
-
-5. 提供波动逻辑解析，说明为什么运势会这样起伏
-
-**输出语言**：${langInstruction}
-
-**重要**：基于本地分析的精确数据生成，不要重新计算基础命理信息。只返回 JSON，不要其他内容。
-`;
+  let mainResult: any;
+  let geographicResult: any;
+  let personalityResult: any;
+  let careerResult: any;
+  let fengShuiResult: any;
+  let wealthResult: any;
+  let marriageResult: any;
+  let timelineResult: any;
 
   try {
-    const result = await callAI(prompt);
+    // AI调用1: 命主属性 & 总述 (35-40%)
+    console.log('🤖 AI调用1: 命主属性与总述');
+    if (progressCallback) {
+      progressCallback(35, getProgressText('step4'), 15);
+    }
+    mainResult = await callAIWithRetry(
+      createMainAttributePrompt(
+        langInstruction,
+        baziString,
+        daYunString,
+        confirmedBaZi.startAge,
+        basicAnalysis.dayElement,
+        basicAnalysis.shiShenAnalysis.dayMasterType,
+        basicAnalysis.strengthAnalysis.strengthDescription
+      ),
+      '命主属性与总述',
+      3
+    );
+    console.log('✅ AI调用1完成');
+    if (progressCallback) {
+      progressCallback(40, getProgressText('step4'), 12);
+    }
+
+    // AI调用2: 地理发展 (40-50%)
+    console.log('🤖 AI调用2: 地理发展');
+    if (progressCallback) {
+      progressCallback(40, getProgressText('step5'), 12);
+    }
+    geographicResult = await callAIWithRetry(
+      createGeographicPrompt(
+        langInstruction,
+        basicAnalysis.dayElement,
+        extendedAnalysis.fengShuiAdvice.favorableElements.join('、'),
+        extendedAnalysis.fengShuiAdvice.favorableDirections.join('、')
+      ),
+      '地理发展分析',
+      3
+    );
+    console.log('✅ AI调用2完成');
+    if (progressCallback) {
+      progressCallback(50, getProgressText('step5'), 10);
+    }
+
+    // AI调用3: 性格分析 (50-60%)
+    console.log('🤖 AI调用3: 性格分析');
+    if (progressCallback) {
+      progressCallback(50, getProgressText('step6'), 10);
+    }
+    personalityResult = await callAIWithRetry(
+      createDimensionPrompt(
+        '性格',
+        langInstruction,
+        {
+          日主: basicAnalysis.dayElement,
+          十神: basicAnalysis.shiShenAnalysis.dayMasterShiShen,
+          强弱: basicAnalysis.strengthAnalysis.strengthDescription
+        }
+      ),
+      '性格分析',
+      3
+    );
+    console.log('✅ AI调用3完成');
+    if (progressCallback) {
+      progressCallback(60, getProgressText('step6'), 8);
+    }
+
+    // AI调用4: 事业分析 (60-70%)
+    console.log('🤖 AI调用4: 事业分析');
+    if (progressCallback) {
+      progressCallback(60, getProgressText('step7'), 8);
+    }
+    careerResult = await callAIWithRetry(
+      createDimensionPrompt(
+        '事业',
+        langInstruction,
+        {
+          事业潜力: `${extendedAnalysis.careerAnalysis.careerScore}/10`,
+          适合职业: extendedAnalysis.careerAnalysis.suitableJobs,
+          领导力: extendedAnalysis.careerAnalysis.leadershipPotential
+        }
+      ),
+      '事业分析',
+      3
+    );
+    console.log('✅ AI调用4完成');
+    if (progressCallback) {
+      progressCallback(70, getProgressText('step7'), 6);
+    }
+
+    // AI调用5: 风水分析 (70-80%)
+    console.log('🤖 AI调用5: 风水分析');
+    if (progressCallback) {
+      progressCallback(70, getProgressText('step8'), 6);
+    }
+    fengShuiResult = await callAIWithRetry(
+      createDimensionPrompt(
+        '风水',
+        langInstruction,
+        {
+          喜用五行: extendedAnalysis.fengShuiAdvice.favorableElements,
+          有利方位: extendedAnalysis.fengShuiAdvice.favorableDirections,
+          有利颜色: extendedAnalysis.fengShuiAdvice.favorableColors
+        }
+      ),
+      '风水分析',
+      3
+    );
+    console.log('✅ AI调用5完成');
+    if (progressCallback) {
+      progressCallback(80, getProgressText('step8'), 5);
+    }
+
+    // AI调用6: 财富分析 (80-90%)
+    console.log('🤖 AI调用6: 财富分析');
+    if (progressCallback) {
+      progressCallback(80, getProgressText('step9'), 5);
+    }
+    wealthResult = await callAIWithRetry(
+      createDimensionPrompt(
+        '财富',
+        langInstruction,
+        {
+          财富等级: `${extendedAnalysis.wealthAnalysis.wealthLevel}/10`,
+          赚钱能力: extendedAnalysis.wealthAnalysis.earningAbility,
+          投资天赋: extendedAnalysis.wealthAnalysis.investmentTalent
+        }
+      ),
+      '财富分析',
+      3
+    );
+    console.log('✅ AI调用6完成');
+    if (progressCallback) {
+      progressCallback(90, getProgressText('step9'), 3);
+    }
+
+    // AI调用7: 婚姻分析 (90-95%)
+    console.log('🤖 AI调用7: 婚姻分析');
+    if (progressCallback) {
+      progressCallback(90, getProgressText('step10'), 3);
+    }
+    marriageResult = await callAIWithRetry(
+      createDimensionPrompt(
+        '婚姻',
+        langInstruction,
+        {
+          婚姻评分: `${extendedAnalysis.marriageAnalysis.marriageScore}/10`,
+          适婚年龄: extendedAnalysis.marriageAnalysis.marriageAge,
+          配偶特征: extendedAnalysis.marriageAnalysis.spouseCharacteristics
+        }
+      ),
+      '婚姻分析',
+      3
+    );
+    console.log('✅ AI调用7完成');
+    if (progressCallback) {
+      progressCallback(95, getProgressText('step10'), 2);
+    }
+
+    // AI调用8: 100年Timeline (95-100%)
+    console.log('🤖 AI调用8: 100年Timeline');
+    if (progressCallback) {
+      progressCallback(95, getProgressText('step11'), 15);
+    }
+    timelineResult = await callAIWithRetry(
+      createTimelinePrompt(
+        langInstruction,
+        birthYear,
+        confirmedBaZi.startAge,
+        basicAnalysis.dayElement
+      ),
+      '人生K线生成',
+      3
+    );
+    console.log('✅ AI调用8完成');
+    if (progressCallback) {
+      progressCallback(100, getProgressText('step11'), 0);
+    }
 
     // -----------------------------------------------------------------------
-    // 数据清洗：确保单一峰值
+    // 数据清洗与合并 (100%)
     // -----------------------------------------------------------------------
+    if (progressCallback) {
+      progressCallback(100, getProgressText('step12'), 0);
+    }
+
+    console.log('🔍 开始数据清洗...');
+
+    // 清洗timeline：确保单一峰值 + 标记关键年份
     let maxHigh = -Infinity;
     let maxClose = -Infinity;
     let peakIdx = -1;
 
-    if (result.timeline && Array.isArray(result.timeline)) {
-      result.timeline.forEach((item: any, idx: number) => {
+    if (timelineResult.timeline && Array.isArray(timelineResult.timeline)) {
+      timelineResult.timeline.forEach((item: any, idx: number) => {
         item.isPeak = false;
+        item.isKeyYear = false;
 
+        // 找出人生巅峰（最高的high值）
         if (item.high > maxHigh) {
           maxHigh = item.high;
           maxClose = item.close;
@@ -393,17 +733,57 @@ ${personalityAnalysis.content}
             peakIdx = idx;
           }
         }
+
+        // 标记大幅波动年份
+        const change = Math.abs(item.close - item.open);
+        if (change > 30) {
+          item.isKeyYear = true;
+        }
+
+        // 标记大运开始的年份
+        const daYunStartYear = birthYear + confirmedBaZi.startAge;
+        if (item.year === daYunStartYear) {
+          item.isKeyYear = true;
+        }
+
+        // 确保isKeyYear有值
+        if (item.isKeyYear === undefined) {
+          item.isKeyYear = false;
+        }
       });
 
-      if (peakIdx !== -1 && result.timeline[peakIdx]) {
-        result.timeline[peakIdx].isPeak = true;
+      // 设置唯一巅峰
+      if (peakIdx !== -1 && timelineResult.timeline[peakIdx]) {
+        timelineResult.timeline[peakIdx].isPeak = true;
+        timelineResult.timeline[peakIdx].isKeyYear = true;
       }
     }
 
-    return {
-      ...result,
-      bazi: confirmedBaZi.bazi
+    console.log('✅ 数据清洗完成');
+
+    // 合并所有结果
+    console.log('🔍 合并所有分析结果...');
+
+    const result: AnalysisResult = {
+      bazi: confirmedBaZi.bazi,
+      mainAttribute: mainResult.mainAttribute,
+      generalComment: mainResult.generalComment,
+      geographicDevelopment: geographicResult,
+      personality: personalityResult,
+      career: careerResult,
+      fengShui: fengShuiResult,
+      wealth: wealthResult,
+      marriage: marriageResult,
+      timeline: timelineResult.timeline,
+      volatilityAnalysis: `基于${basicAnalysis.dayElement}命（${basicAnalysis.shiShenAnalysis.dayMasterType}）和${basicAnalysis.strengthAnalysis.strengthDescription}的综合分析，结合${extendedAnalysis.fengShuiAdvice.favorableElements.join('、')}等喜用五行的运势起伏规律。`
     };
+
+    console.log('✅ 所有分析完成');
+    if (progressCallback) {
+      progressCallback(100, getProgressText('complete'), 0);
+    }
+
+    return result;
   } catch (error: any) {
     console.error("Destiny Analysis Error:", error);
 

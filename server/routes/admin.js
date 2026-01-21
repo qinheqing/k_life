@@ -20,10 +20,8 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/stats', verifyAdmin, (req, res) => {
-  db.get('SELECT COUNT(*) as total, SUM(CASE WHEN is_used = 1 THEN 1 ELSE 0 END) as used FROM access_codes', (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
+  try {
+    const row = db.get('SELECT COUNT(*) as total, SUM(CASE WHEN is_used = 1 THEN 1 ELSE 0 END) as used FROM access_codes');
     const unused = row.total - row.used;
     const usageRate = row.total > 0 ? ((row.used / row.total) * 100).toFixed(2) : 0;
     res.json({
@@ -32,33 +30,34 @@ router.get('/stats', verifyAdmin, (req, res) => {
       unused,
       usageRate
     });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 router.get('/codes', verifyAdmin, (req, res) => {
   const { page = 1, limit = 20, status = 'all', search = '' } = req.query;
   const offset = (page - 1) * limit;
 
-  let query = 'SELECT * FROM access_codes WHERE 1=1';
-  const params = [];
+  try {
+    let query = 'SELECT * FROM access_codes WHERE 1=1';
+    const params = [];
 
-  if (status !== 'all') {
-    query += ' AND is_used = ?';
-    params.push(status === 'used' ? 1 : 0);
-  }
-
-  if (search) {
-    query += ' AND code LIKE ?';
-    params.push(`%${search}%`);
-  }
-
-  query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), offset);
-
-  db.all(query, params, (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
+    if (status !== 'all') {
+      query += ' AND is_used = ?';
+      params.push(status === 'used' ? 1 : 0);
     }
+
+    if (search) {
+      query += ' AND code LIKE ?';
+      params.push(`%${search}%`);
+    }
+
+    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
+
+    const stmt = db.prepare(query);
+    const rows = stmt.all(params);
 
     let countQuery = 'SELECT COUNT(*) as total FROM access_codes WHERE 1=1';
     const countParams = [];
@@ -73,20 +72,19 @@ router.get('/codes', verifyAdmin, (req, res) => {
       countParams.push(`%${search}%`);
     }
 
-    db.get(countQuery, countParams, (err, countRow) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
+    const countStmt = db.prepare(countQuery);
+    const countRow = countStmt.get(countParams);
 
-      res.json({
-        codes: rows,
-        total: countRow.total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(countRow.total / limit)
-      });
+    res.json({
+      codes: rows,
+      total: countRow.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(countRow.total / limit)
     });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 router.post('/codes/generate', verifyAdmin, (req, res) => {
@@ -103,104 +101,87 @@ router.post('/codes/generate', verifyAdmin, (req, res) => {
   const codes = [];
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let successCount = 0;
+  const stmt = db.prepare('INSERT INTO access_codes (code) VALUES (?)');
+  const checkStmt = db.prepare('SELECT id FROM access_codes WHERE code = ?');
 
-  const generateSingleCode = (index, attempts = 0) => {
-    if (index >= count) {
-      logAction('GENERATE_CODES', `Generated ${successCount} codes`);
-      res.json({ success: true, count: successCount, codes });
-      return;
-    }
-
-    if (attempts >= 100) {
-      generateSingleCode(index + 1);
-      return;
-    }
-
-    let code = '';
-    for (let i = 0; i < length; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    db.get('SELECT id FROM access_codes WHERE code = ?', [code], (err, row) => {
-      if (err) {
-        console.error('Database error:', err);
-        generateSingleCode(index, attempts + 1);
-        return;
+  for (let i = 0; i < count; i++) {
+    let attempts = 0;
+    while (attempts < 100) {
+      let code = '';
+      for (let j = 0; j < length; j++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
 
-      if (!row) {
-        db.run('INSERT INTO access_codes (code) VALUES (?)', [code], (err) => {
-          if (err) {
-            console.error('Insert error:', err);
-            generateSingleCode(index, attempts + 1);
-            return;
-          }
-
+      const existing = checkStmt.get([code]);
+      if (!existing) {
+        try {
+          stmt.run([code]);
           successCount++;
           codes.push(code);
-          generateSingleCode(index + 1);
-        });
+          break;
+        } catch (err) {
+          attempts++;
+        }
       } else {
-        generateSingleCode(index, attempts + 1);
+        attempts++;
       }
-    });
-  };
+    }
+  }
 
-  generateSingleCode(0);
+  logAction('GENERATE_CODES', `Generated ${successCount} codes`);
+  res.json({ success: true, count: successCount, codes });
 });
 
 router.put('/codes/:id/reset', verifyAdmin, (req, res) => {
   const { id } = req.params;
 
-  db.run(
-    'UPDATE access_codes SET is_used = 0, used_at = NULL, user_name = NULL, user_ip = NULL WHERE id = ?',
-    [id],
-    function(err) {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
+  try {
+    const stmt = db.prepare(
+      'UPDATE access_codes SET is_used = 0, used_at = NULL, user_name = NULL, user_ip = NULL WHERE id = ?'
+    );
+    const result = stmt.run([id]);
 
-      if (this.changes === 0) {
-        return res.status(404).json({ error: 'Code not found' });
-      }
-
-      logAction('RESET_CODE', `Reset code ID: ${id}`);
-      res.json({ success: true, message: 'Code reset successfully' });
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Code not found' });
     }
-  );
+
+    logAction('RESET_CODE', `Reset code ID: ${id}`);
+    res.json({ success: true, message: 'Code reset successfully' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 router.delete('/codes/:id', verifyAdmin, (req, res) => {
   const { id } = req.params;
 
-  db.run('DELETE FROM access_codes WHERE id = ?', [id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
+  try {
+    const stmt = db.prepare('DELETE FROM access_codes WHERE id = ?');
+    const result = stmt.run([id]);
 
-    if (this.changes === 0) {
+    if (result.changes === 0) {
       return res.status(404).json({ error: 'Code not found' });
     }
 
     logAction('DELETE_CODE', `Deleted code ID: ${id}`);
     res.json({ success: true, message: 'Code deleted successfully' });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 router.get('/logs', verifyAdmin, (req, res) => {
   const { limit = 50 } = req.query;
 
-  db.all(
-    'SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT ?',
-    [parseInt(limit)],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database error' });
-      }
-
-      res.json({ logs: rows });
-    }
-  );
+  try {
+    const rows = db.all(
+      'SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT ?',
+      [parseInt(limit)]
+    );
+    res.json({ logs: rows });
+  } catch (err) {
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 module.exports = router;

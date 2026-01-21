@@ -18,54 +18,41 @@ console.log(`Generating ${count} codes with length ${length}...`);
 
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const codes = [];
-const existingCodes = new Set();
 
-db.all('SELECT code FROM access_codes', (err, rows) => {
-  if (err) {
-    console.error('Error fetching existing codes:', err);
-    process.exit(1);
-  }
+try {
+  const stmt = db.prepare('SELECT code FROM access_codes');
+  const rows = stmt.all();
+  const existingCodes = new Set(rows.map(row => row.code));
 
-  rows.forEach(row => existingCodes.add(row.code));
-  generateCodes();
-});
-
-function generateCodes() {
   let generated = 0;
   let attempts = 0;
   const maxAttempts = count * 100;
+  const insertStmt = db.prepare('INSERT INTO access_codes (code) VALUES (?)');
 
-  const generateSingle = () => {
-    while (generated < count && attempts < maxAttempts) {
-      attempts++;
+  while (generated < count && attempts < maxAttempts) {
+    attempts++;
 
-      let code = '';
-      for (let i = 0; i < length; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-
-      if (!existingCodes.has(code)) {
-        existingCodes.add(code);
-        codes.push(code);
-
-        db.run('INSERT INTO access_codes (code) VALUES (?)', [code], (err) => {
-          if (err) {
-            console.error('Error inserting code:', err);
-          }
-        });
-
-        generated++;
-        process.stdout.write('.');
-      }
+    let code = '';
+    for (let i = 0; i < length; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    console.log('\nGenerated codes:');
-    codes.forEach(code => console.log(code));
-    console.log(`\nTotal: ${codes.length} codes (${attempts} attempts)`);
+    if (!existingCodes.has(code)) {
+      existingCodes.add(code);
+      insertStmt.run([code]);
+      codes.push(code);
+      generated++;
+      process.stdout.write('.');
+    }
+  }
 
-    db.close();
-    process.exit(0);
-  };
+  console.log('\nGenerated codes:');
+  codes.forEach(code => console.log(code));
+  console.log(`\nTotal: ${codes.length} codes (${attempts} attempts)`);
 
-  generateSingle();
+  db.close();
+  process.exit(0);
+} catch (err) {
+  console.error('Error:', err);
+  process.exit(1);
 }

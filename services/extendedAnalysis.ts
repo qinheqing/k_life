@@ -1,25 +1,26 @@
 import { BasicAnalysisResult } from './basicAnalysis';
 import { UserInput } from '../types';
+import { analyzeGeographicDirection } from './geographicAnalysis';
 
 export interface ExtendedAnalysisResult {
   // 事业分析
   careerAnalysis: {
     recommendedSectors: string[];
     suitableJobs: string[];
-    careerScore: number; // 1-10
+    careerScore: number; //1-10
     careerDetail: string;
     workStyle: string;
-    leadershipPotential: number; // 1-10
-    entrepreneurshipPotential: number; // 1-10
-    teamworkAbility: number; // 1-10
+    leadershipPotential: number; //1-10
+    entrepreneurshipPotential: number; //1-10
+    teamworkAbility: number; //1-10
   };
   
   // 财富分析
   wealthAnalysis: {
-    wealthLevel: number; // 1-10
-    earningAbility: number; // 1-10
-    investmentTalent: number; // 1-10
-    savingHabits: number; // 1-10
+    wealthLevel: number; //1-10
+    earningAbility: number; //1-10
+    investmentTalent: number; //1-10
+    savingHabits: number; //1-10
     wealthDetail: string;
     moneyAttitude: string;
     wealthTiming: string; // 财运转好的时机
@@ -30,8 +31,8 @@ export interface ExtendedAnalysisResult {
     marriageAge: string; // 适合结婚的年龄
     spouseCharacteristics: string;
     marriageType: string;
-    marriageScore: number; // 1-10
-    divorceRisk: number; // 1-10 (数字越小越安全)
+    marriageScore: number; //1-10
+    divorceRisk: number; //1-10 (数字越小越安全)
     compatibility: {
       withElement: Record<string, number>; // 与各五行的兼容性
       withShengXiao: Record<string, number>; // 与各生肖的兼容性
@@ -57,7 +58,7 @@ export interface ExtendedAnalysisResult {
   
   // 健康分析
   healthAnalysis: {
-    healthLevel: number; // 1-10
+    healthLevel: number; //1-10
     susceptibleDiseases: string[];
     healthTips: string[];
     exerciseRecommendation: string;
@@ -67,11 +68,19 @@ export interface ExtendedAnalysisResult {
   
   // 教育学习
   educationAnalysis: {
-    learningAbility: number; // 1-10
+    learningAbility: number; //1-10
     bestSubjects: string[];
     suitableEducationFields: string[];
     studyMethod: string;
     educationDetail: string;
+  };
+  
+  // 地理分析
+  geographicAnalysis: {
+    favorableProvinces: string[];
+    favorableCities: string[];
+    unfavorableRegions: string[];
+    careerMatch: Record<string, number>;
   };
 }
 
@@ -102,13 +111,22 @@ export function generateExtendedAnalysis(
   // 教育学习
   const educationAnalysis = analyzeEducation(shiShenAnalysis.dayMasterType, dayElement);
   
+  // 地理分析
+  const geographicAnalysis = analyzeGeographicDirection(
+    userInput.birthDate,
+    userInput.birthTime,
+    dayElement,
+    shiShenAnalysis.dayMasterType
+  );
+  
   return {
     careerAnalysis,
     wealthAnalysis,
     marriageAnalysis,
     fengShuiAdvice,
     healthAnalysis,
-    educationAnalysis
+    educationAnalysis,
+    geographicAnalysis
   };
 }
 
