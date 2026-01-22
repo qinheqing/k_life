@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, TrendingUp, Globe, BarChart3, Shield, Zap, ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Sparkles, TrendingUp, Globe, BarChart3, Shield, Zap, ArrowRight, Star, Crown, Gem } from 'lucide-react';
 import { Language } from '../types';
 import { getTexts } from '../locales';
 
@@ -57,132 +57,317 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, lang }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-gray-50 dark:from-amber-50 dark:via-orange-50 dark:to-amber-50 transition-colors duration-200">
+    <div className="min-h-screen relative overflow-hidden bg-[var(--bg-primary)] transition-colors duration-300">
+      {/* Background Decoration - 柔和背景装饰 */}
+      <div className="bg-decoration">
+        <div className="bg-orb bg-orb-1 animate-float" style={{background: 'var(--accent-primary)', opacity: 0.06}}></div>
+        <div className="bg-orb bg-orb-2 animate-float" style={{animationDelay: '-10s', background: 'var(--accent-secondary)', opacity: 0.04}}></div>
+        <div className="bg-orb bg-orb-3 animate-float" style={{animationDelay: '-5s', background: 'var(--accent-emphasis)', opacity: 0.05}}></div>
+      </div>
+
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center">
-        {/* Version Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-600 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-600 text-sm mb-8 backdrop-blur-sm transition-colors duration-200">
-          <Sparkles className="w-4 h-4" />
-          <span>{lang === 'zh' ? '基于AI深度训练模型驱动' : 'Powered by Advanced AI Models'} v1.0</span>
+      <div className="relative max-w-7xl mx-auto px-4 pt-24 pb-20">
+        {/* Floating Elements - 使用新配色 */}
+        <div className="absolute top-32 left-10 animate-float" style={{animationDelay: '2s'}}>
+          <div className="glass-card p-4 animate-luxury-glow">
+            <Star className="w-6 h-6" style={{color: 'var(--accent-primary)'}} />
+          </div>
+        </div>
+        <div className="absolute top-40 right-20 animate-float" style={{animationDelay: '4s'}}>
+          <div className="glass-card p-3 animate-luxury-glow" style={{animationDelay: '1s'}}>
+            <Crown className="w-8 h-8" style={{color: 'var(--accent-emphasis)'}} />
+          </div>
+        </div>
+        <div className="absolute top-60 left-1/4 animate-float" style={{animationDelay: '6s'}}>
+          <div className="glass-card p-3 animate-luxury-glow" style={{animationDelay: '3s'}}>
+            <Gem className="w-6 h-6" style={{color: 'var(--accent-secondary)'}} />
+          </div>
+        </div>
+
+        {/* Premium Badge */}
+        <div className="flex justify-center mb-12">
+          <div className="glass-card-light px-6 py-3 animate-luxury-scale-in">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Sparkles className="w-5 h-5 animate-pulse" style={{color: 'var(--accent-primary)'}} />
+                <div className="absolute inset-0 animate-ping">
+                  <Sparkles className="w-5 h-5 opacity-75" style={{color: 'var(--accent-primary)'}} />
+                </div>
+              </div>
+              <span className="text-sm font-medium tracking-wide" style={{color: 'var(--accent-primary)'}}>
+                {lang === 'zh' ? 'AI深度训练模型驱动' : 'Powered by Advanced AI Models'}
+              </span>
+              <div className="px-2 py-1 rounded-full" style={{backgroundColor: 'var(--accent-glow)'}}>
+                <span className="text-xs font-bold" style={{color: 'var(--accent-emphasis)'}}>v2.0</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Heading */}
-        <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-gray-800 mb-4 tracking-tight transition-colors duration-200">
-          {lang === 'zh' ? '洞悉命运起伏' : 'Life Fortune Analysis'}
-        </h1>
-        <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
-          <span className="bg-gradient-to-r from-teal-500 to-cyan-500 dark:from-orange-500 dark:to-amber-500 bg-clip-text text-transparent transition-all duration-200">
-            {lang === 'zh' ? '预见人生轨迹' : 'Visualize Your Destiny'}
-          </span>
-        </h2>
+        <div className="text-center mb-16">
+          <h1 className="text-6xl md:text-8xl font-bold luxury-heading mb-6 animate-luxury-fade-in">
+            {lang === 'zh' ? '洞悉命运奥秘' : 'Unlock Destiny Secrets'}
+          </h1>
+          <h2 className="text-4xl md:text-6xl font-bold mb-8 animate-luxury-slide-up animate-delay-200" style={{fontFamily: 'var(--font-display)'}}>
+            <span className="bg-gradient-to-r bg-clip-text text-transparent animate-gradient-shift" style={{
+              backgroundImage: `linear-gradient(to right, var(--accent-primary), var(--accent-emphasis), var(--accent-secondary))`,
+              backgroundSize: '200% 100%'
+            }}>
+              {lang === 'zh' ? '预见人生轨迹' : 'Visualize Your Future'}
+            </span>
+          </h2>
 
-        {/* Subtitle */}
-        <p className="text-xl text-gray-600 dark:text-gray-700 max-w-3xl mx-auto mb-12 leading-relaxed transition-colors duration-200">
-          {lang === 'zh'
-            ? '结合传统八字命理与现代金融数据可视化，将您的一生运势转化为直观的K线图。基于AI深度分析，助您发现人生牛市，规避风险熊市，把握关键转折点。'
-            : 'Combining traditional BaZi numerology with modern financial visualization. Transform your lifetime fortune into intuitive K-line charts. Discover your bull markets, avoid bear risks, and seize key turning points.'
-          }
-        </p>
-
-        {/* CTA Button */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
-          <button
-            onClick={onGetStarted}
-            className="group px-8 py-4 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 dark:bg-orange-500 dark:hover:bg-orange-600 dark:shadow-orange-500/30 dark:hover:shadow-orange-500/50"
-          >
-            {lang === 'zh' ? '开始分析' : 'Get Started'}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
-        {/* Demo Screenshot - K-Line Chart */}
-        <div id="demo" className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-amber-200 bg-white/50 dark:bg-amber-50/50 backdrop-blur transition-colors duration-200">
-          <div className="absolute top-0 left-0 right-0 h-10 bg-white/80 dark:bg-amber-100/80 backdrop-blur flex items-center px-4 gap-2 border-b border-gray-200 dark:border-amber-200 transition-colors duration-200">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <div className="ml-4 text-xs text-gray-500 dark:text-gray-700 font-mono transition-colors duration-200">
-              {lang === 'zh' ? 'app.lifekline.com' : 'app.lifekline.com'}
+          {/* Subtitle with Typing Effect */}
+          <div className="max-w-4xl mx-auto mb-12 animate-luxury-scale-in animate-delay-400">
+            <p className="text-xl md:text-2xl leading-relaxed font-light" style={{color: 'var(--text-secondary)'}}>
+              {lang === 'zh'
+                ? '✨ 融合传统八字智慧与前沿AI技术 • 将您的一生运势转化为震撼的视觉体验'
+                : '✨ Combining ancient BaZi wisdom with cutting-edge AI • Transform your lifetime into stunning visuals'
+              }
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-2" style={{color: 'var(--accent-primary)'}}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{backgroundColor: 'var(--accent-primary)'}}></div>
+              <span className="text-sm font-medium tracking-wider">
+                {lang === 'zh' ? '现代科技与古典命理的完美邂逅' : 'Perfect Encounter of Modern Tech & Ancient Wisdom'}
+              </span>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{animationDelay: '0.5s', backgroundColor: 'var(--accent-primary)'}}></div>
             </div>
           </div>
-           <div className="pt-10">
-            <img
-               src="/doc/k-line-light.png"
-               alt="K-Line Chart Demo"
-               className="w-full h-auto"
-               onError={(e) => {
-                 // Fallback if image doesn't load
-                 e.currentTarget.style.display = 'none';
-               }}
-             />
-           </div>
+        </div>
+
+        {/* Premium CTA Section */}
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-24 animate-luxury-slide-up animate-delay-600">
+          <button
+            onClick={onGetStarted}
+            className="btn-luxury group text-lg px-12 py-6 rounded-2xl animate-luxury-glow flex items-center gap-3"
+          >
+            <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+            <span className="font-semibold">
+              {lang === 'zh' ? '开启命运之旅' : 'Begin Your Journey'}
+            </span>
+            <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+          </button>
+
+          <div className="text-sm flex items-center gap-2" style={{color: 'var(--text-muted)'}}>
+            <div className="w-1 h-1 rounded-full animate-pulse" style={{backgroundColor: 'var(--accent-primary)'}}></div>
+            <span>{lang === 'zh' ? '免费体验 • 3分钟内获得专业报告' : 'Free Experience • Professional Report in 3 Minutes'}</span>
+            <div className="w-1 h-1 rounded-full animate-pulse" style={{animationDelay: '1s', backgroundColor: 'var(--accent-primary)'}}></div>
+          </div>
+        </div>
+
+        {/* Interactive Demo Preview */}
+        <div className="relative max-w-5xl mx-auto">
+          <div className="glass-card-light p-8 animate-luxury-scale-in animate-delay-700">
+            {/* Window Chrome */}
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+              </div>
+              <div className="ml-4 text-xs text-gray-400 font-mono bg-gray-800/50 px-3 py-1 rounded-full">
+                app.lifekline.ai
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-green-400 font-medium">AI分析中</span>
+              </div>
+            </div>
+            
+            {/* Demo Content */}
+            <div className="relative">
+              <img
+                src="/doc/k-line-light.png"
+                alt="K-Line Chart Demo"
+                className="w-full h-auto rounded-xl shadow-2xl"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  // Show enhanced fallback demo
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              
+              {/* Fallback Demo */}
+              <div className="hidden space-y-4 p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-yellow-400">命运分析报告</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-green-400">实时分析</span>
+                  </div>
+                </div>
+                <div className="h-64 bg-gradient-to-br from-yellow-900/20 to-amber-900/20 rounded-xl border border-yellow-400/20 flex items-center justify-center">
+                  <div className="text-center">
+                    <BarChart3 className="w-16 h-16 text-yellow-400 mx-auto mb-4 animate-pulse" />
+                    <p className="text-gray-300">K线图预览</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="max-w-6xl mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-800 mb-4 transition-colors duration-200">
-            {lang === 'zh' ? '核心功能' : 'Core Features'}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-700 text-lg transition-colors duration-200">
-            {lang === 'zh'
-              ? '现代科技与传统命理的完美结合'
-              : 'Perfect blend of modern technology and traditional numerology'
-            }
-          </p>
+      <div className="relative max-w-7xl mx-auto px-4 py-24">
+        {/* Section Header */}
+        <div className="text-center mb-20">
+          <div className="glass-card-light inline-block px-8 py-4 mb-8 animate-luxury-scale-in">
+            <h3 className="text-3xl md:text-4xl font-bold luxury-heading mb-2">
+              {lang === 'zh' ? '核心功能' : 'Core Features'}
+            </h3>
+            <p className="text-gray-400 text-lg">
+              {lang === 'zh' ? '现代科技与古典智慧的完美融合' : 'Perfect Fusion of Modern Tech & Ancient Wisdom'}
+            </p>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="p-6 rounded-xl bg-white dark:bg-white border border-gray-200 dark:border-amber-200 hover:border-teal-500/50 dark:hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 dark:hover:shadow-orange-500/10 backdrop-blur"
+              className="card-luxury group animate-luxury-scale-in"
+              style={{animationDelay: `${index * 0.1}s`}}
             >
-              <div className="w-12 h-12 rounded-lg bg-teal-500/10 dark:bg-orange-500/10 text-teal-600 dark:text-orange-600 flex items-center justify-center mb-4 transition-colors duration-200">
-                {feature.icon}
+              {/* Icon Container */}
+              <div className="relative mb-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300" style={{
+                  background: `linear-gradient(135deg, var(--accent-primary), var(--accent-emphasis))`
+                }}>
+                  <div className="text-white">
+                    {feature.icon}
+                  </div>
+                </div>
+                {/* Glow Effect */}
+                <div className="absolute inset-0 rounded-2xl opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-300" style={{
+                  background: `linear-gradient(135deg, var(--accent-primary), var(--accent-emphasis))`
+                }}></div>
               </div>
-              <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-800 mb-2 transition-colors duration-200">
-                {lang === 'zh' ? feature.titleZh : feature.titleEn}
-              </h4>
-              <p className="text-gray-600 dark:text-gray-700 leading-relaxed transition-colors duration-200">
-                {lang === 'zh' ? feature.descZh : feature.descEn}
-              </p>
+
+              {/* Content */}
+              <div>
+                <h4 className="text-xl font-bold mb-3 transition-colors" style={{
+                  color: 'var(--accent-primary)',
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: 600
+                }}>
+                  {lang === 'zh' ? feature.titleZh : feature.titleEn}
+                </h4>
+                <p className="leading-relaxed transition-colors" style={{color: 'var(--text-secondary)'}}>
+                  {lang === 'zh' ? feature.descZh : feature.descEn}
+                </p>
+              </div>
+
+              {/* Hover Decoration */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: 'var(--accent-glow)'}}>
+                  <Sparkles className="w-4 h-4" style={{color: 'var(--accent-primary)'}} />
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-        <div className="rounded-2xl bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-amber-100 dark:to-orange-100 border border-teal-200 dark:border-amber-300 p-12 backdrop-blur transition-colors duration-200">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-800 mb-4 transition-colors duration-200">
-            {lang === 'zh' ? '开启您的命运之旅' : 'Start Your Journey'}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-700 text-lg mb-8 transition-colors duration-200">
-            {lang === 'zh'
-              ? '只需几分钟，即可获得专业的AI命运分析报告'
-              : 'Get your professional AI destiny analysis in minutes'
-            }
-          </p>
-          <button
-            onClick={onGetStarted}
-            className="group px-10 py-5 bg-teal-500 hover:bg-teal-600 text-white text-lg font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 mx-auto shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 dark:bg-orange-500 dark:hover:bg-orange-600 dark:shadow-orange-500/30 dark:hover:shadow-orange-500/50"
-          >
-            {lang === 'zh' ? '立即开始' : 'Get Started Now'}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+      {/* Bottom CTA Section */}
+      <div className="relative max-w-5xl mx-auto px-4 py-24">
+        <div className="glass-card-light p-12 text-center relative overflow-hidden animate-luxury-scale-in">
+          {/* Background Decoration */}
+          <div className="absolute inset-0 animate-gradient-shift" style={{
+            background: `linear-gradient(to right, var(--accent-glow), transparent, var(--accent-glow))`,
+            backgroundSize: '200% 100%'
+          }}></div>
+          <div className="absolute top-0 left-0 w-full h-1" style={{
+            background: `linear-gradient(to right, transparent, var(--accent-primary), transparent)`
+          }}></div>
+          <div className="absolute bottom-0 left-0 w-full h-1" style={{
+            background: `linear-gradient(to right, transparent, var(--accent-primary), transparent)`
+          }}></div>
+
+          {/* Content */}
+          <div className="relative">
+            {/* Floating Icons */}
+            <div className="absolute -top-10 -left-10 animate-float" style={{animationDelay: '1s', opacity: 0.3}}>
+              <Crown className="w-12 h-12" style={{color: 'var(--accent-secondary)'}} />
+            </div>
+            <div className="absolute -top-10 -right-10 animate-float" style={{animationDelay: '2s', opacity: 0.3}}>
+              <Gem className="w-10 h-10" style={{color: 'var(--accent-emphasis)'}} />
+            </div>
+
+            {/* Main Content */}
+            <div className="mb-8">
+              <h3 className="text-4xl md:text-5xl font-bold luxury-heading mb-4">
+                {lang === 'zh' ? '开启您的命运之旅' : 'Start Your Journey'}
+              </h3>
+              <p className="text-xl mb-8 leading-relaxed" style={{color: 'var(--text-secondary)'}}>
+                {lang === 'zh'
+                  ? '✨ 只需几分钟，即可获得AI驱动的专业命运分析报告'
+                  : '✨ Get your professional AI-powered destiny analysis in minutes'
+                }
+              </p>
+
+              {/* Stats */}
+              <div className="flex justify-center gap-8 mb-8 text-sm">
+                <div className="text-center">
+                  <div className="text-2xl font-bold" style={{color: 'var(--accent-primary)'}}>98%</div>
+                  <div style={{color: 'var(--text-muted)'}}>{lang === 'zh' ? '准确率' : 'Accuracy'}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold" style={{color: 'var(--accent-primary)'}}>3min</div>
+                  <div style={{color: 'var(--text-muted)'}}>{lang === 'zh' ? '快速分析' : 'Quick Analysis'}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold" style={{color: 'var(--accent-primary)'}}>100%</div>
+                  <div style={{color: 'var(--text-muted)'}}>{lang === 'zh' ? '免费' : 'Free'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <button
+              onClick={onGetStarted}
+              className="btn-luxury group text-xl px-16 py-6 animate-luxury-glow flex items-center gap-3 mx-auto"
+            >
+              <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              <span className="font-bold">
+                {lang === 'zh' ? '立即开始分析' : 'Start Analysis Now'}
+              </span>
+              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </button>
+
+            {/* Trust Indicators */}
+            <div className="mt-8 flex items-center justify-center gap-6 text-sm" style={{color: 'var(--text-muted)'}}>
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span>{lang === 'zh' ? '隐私安全' : 'Privacy Secured'}</span>
+              </div>
+              <div className="w-1 h-1 rounded-full" style={{backgroundColor: 'var(--text-muted)'}}></div>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4" />
+                <span>{lang === 'zh' ? '专业可信' : 'Professional'}</span>
+              </div>
+              <div className="w-1 h-1 rounded-full" style={{backgroundColor: 'var(--text-muted)'}}></div>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                <span>{lang === 'zh' ? '即时结果' : 'Instant Results'}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Footer Note */}
-      <div className="max-w-6xl mx-auto px-4 pb-12 text-center">
-        <p className="text-gray-500 dark:text-gray-600 text-sm transition-colors duration-200">
-          {lang === 'zh'
-            ? '本项目仅供娱乐和文化研究使用 • 开源项目 • MIT License'
-            : 'For entertainment and cultural research only • Open Source • MIT License'
-          }
-        </p>
+      <div className="relative max-w-6xl mx-auto px-4 pb-16 text-center">
+        <div className="glass-card inline-block px-8 py-4 animate-luxury-fade-in">
+          <p className="text-sm" style={{color: 'var(--text-muted)'}}>
+            {lang === 'zh'
+              ? '本项目仅供娱乐和文化研究使用 • 开源项目 • MIT License'
+              : 'For entertainment and cultural research only • Open Source • MIT License'
+            }
+          </p>
+        </div>
       </div>
     </div>
   );

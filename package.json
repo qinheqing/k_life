@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "pm2:dev": "pm2 start ecosystem.config.cjs --only life-destiny-k-line",
-    "pm2:prod": "pm2 start ecosystem.config.cjs --only life-destiny-k-line-prod",
-    "pm2:stop": "pm2 stop ecosystem.config.cjs",
-    "pm2:restart": "pm2 restart ecosystem.config.cjs",
-    "pm2:logs": "pm2 logs life-destiny-k-line",
-    "pm2:status": "pm2 status"
+    "pm2:dev": "./pm2-manage.sh dev start",
+    "pm2:prod": "./pm2-manage.sh prod start",
+    "pm2:stop": "./pm2-manage.sh dev stop",
+    "pm2:restart": "./pm2-manage.sh dev restart",
+    "pm2:status": "./pm2-manage.sh dev status",
+    "pm2:logs": "./pm2-manage.sh dev logs",
+    "pm2:monitor": "./pm2-manage.sh dev monitor",
+    "pm2:clean": "./pm2-manage.sh clean"
   },
   "dependencies": {
     "html2canvas": "1.4.1",

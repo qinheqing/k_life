@@ -119,9 +119,12 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
   const t = getTexts(lang);
   
   // Determine chart colors based on theme
-  const gridColor = theme === 'dark' ? '#fed7aa' : '#f0f0f0'; // amber-200 for dark mode
-  const tickColor = theme === 'dark' ? '#78716c' : '#9CA3AF'; // stone-500 for dark mode
-  const axisColor = theme === 'dark' ? '#fcd34d' : '#e5e7eb'; // amber-300 for dark mode
+  const gridColor = theme === 'dark' ? 'rgba(193, 125, 79, 0.15)' : 'rgba(212, 165, 116, 0.12)';
+  const tickColor = theme === 'dark' ? '#78716C' : '#999999';
+  const axisColor = theme === 'dark' ? 'rgba(193, 125, 79, 0.25)' : 'rgba(212, 165, 116, 0.2)';
+  const tooltipBg = theme === 'dark' ? '#FFF9F0' : '#FFFFFF';
+  const tooltipBorder = theme === 'dark' ? 'rgba(193, 125, 79, 0.2)' : 'rgba(212, 165, 116, 0.15)';
+  const tooltipText = theme === 'dark' ? '#3E3632' : '#1A1A1A';
 
   const chartData = data.map((d) => ({
     ...d,
@@ -129,21 +132,29 @@ const KLineChart: React.FC<KLineChartProps> = ({ data, volatilityAnalysis, lang,
   }));
 
   return (
-    <div className="w-full bg-white dark:bg-amber-50 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-amber-200 mb-8 transition-colors duration-200">
+    <div className="w-full p-6 rounded-2xl shadow-sm border mb-8 transition-colors duration-300" style={{
+      backgroundColor: 'var(--bg-card)',
+      borderColor: 'var(--border-subtle)'
+    }}>
         <div className="flex justify-between items-end mb-6">
             <div>
                 <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-purple-600 dark:bg-orange-500 rounded-full transition-colors duration-200"></div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-gray-800 transition-colors duration-200">{t.klineTitle}</h3>
+                    <div className="w-1 h-6 rounded-full transition-colors duration-200" style={{
+                      backgroundColor: 'var(--accent-primary)'
+                    }}></div>
+                    <h3 className="text-xl font-bold transition-colors duration-200" style={{
+                      color: 'var(--text-primary)',
+                      fontFamily: 'var(--font-body)'
+                    }}>{t.klineTitle}</h3>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-600 mt-1 transition-colors duration-200">{t.klineSubtitle}</p>
+                <p className="text-sm mt-1 transition-colors duration-200" style={{color: 'var(--text-muted)'}}>{t.klineSubtitle}</p>
             </div>
             <div className="flex items-center gap-4 text-xs font-mono">
-                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-700">
-                    <div className="w-3 h-3 bg-green-500 rounded-sm"></div> {t.bullMarket}
+                <div className="flex items-center gap-1" style={{color: 'var(--text-secondary)'}}>
+                    <div className="w-3 h-3 rounded-sm" style={{backgroundColor: 'var(--bull-color)'}}></div> {t.bullMarket}
                 </div>
-                <div className="flex items-center gap-1 text-gray-600 dark:text-gray-700">
-                    <div className="w-3 h-3 bg-red-500 rounded-sm"></div> {t.bearMarket}
+                <div className="flex items-center gap-1" style={{color: 'var(--text-secondary)'}}>
+                    <div className="w-3 h-3 rounded-sm" style={{backgroundColor: 'var(--bear-color)'}}></div> {t.bearMarket}
                 </div>
             </div>
         </div>

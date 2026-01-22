@@ -4,7 +4,7 @@ This file guides AI agents working on this Life K-Line codebase.
 
 ## Proxy Configuration
 
-**IMPORTANT**: Only use proxy for Git and Docker operations. Frontend and backend servers do NOT require proxy.
+**IMPORTANT**: Only use proxy for Git and Docker operations. Frontend and backend servers (whether started directly or via PM2) do NOT require proxy.
 
 ```bash
 # Git operations with proxy
@@ -33,13 +33,48 @@ cd server && npm start          # Backend (port 3004)
 - `npm run build` - Production build with manual chunk splitting
 - `npm run preview` - Preview production build locally
 
-### PM2 Process Management
-- `npm run pm2:dev` - Start with PM2 in development mode
-- `npm run pm2:prod` - Start with PM2 in production mode
+### PM2 Process Management (推荐使用PM2管理服务）
+- `npm run pm2:dev` - Start with PM2 in development mode (frontend dev + backend dev)
+- `npm run pm2:prod` - Start with PM2 in production mode (frontend preview + backend cluster)
 - `npm run pm2:stop` - Stop PM2 processes
 - `npm run pm2:restart` - Restart PM2 processes
-- `npm run pm2:logs` - View PM2 logs
 - `npm run pm2:status` - Check PM2 process status
+- `npm run pm2:logs` - View PM2 logs
+- `npm run pm2:monitor` - Real-time PM2 monitoring
+- `npm run pm2:clean` - Clean all PM2 processes
+
+### PM2 管理脚本（更详细）
+- `./pm2-manage.sh dev start` - Start development environment
+- `./pm2-manage.sh dev stop` - Stop development environment
+- `./pm2-manage.sh dev restart` - Restart development environment
+- `./pm2-manage.sh dev status` - Check development status
+- `./pm2-manage.sh dev logs` - View development logs
+- `./pm2-manage.sh dev monitor` - Real-time monitoring
+- `./pm2-manage.sh prod start` - Start production environment
+- `./pm2-manage.sh clean` - Clean all PM2 processes
+
+### 传统启动脚本（已废弃，建议使用PM2）
+- `./start-backend.sh` - Backend server management (legacy)
+
+### PM2 应用架构
+
+**开发环境：**
+- life-destiny-frontend-dev (端口3003) - Vite开发服务器
+- life-destiny-backend-dev (端口3004) - Node.js开发服务器
+
+**生产环境：**
+- life-destiny-frontend-prod (端口3003) - 预览模式
+- life-destiny-backend-prod (端口3004) - 集群模式（2实例）
+
+**访问地址：**
+- 前端: http://localhost:3003
+- 后端API: http://localhost:3004/api
+- 管理面板: http://localhost:3004/admin
+
+### PM2 配置文件
+- 配置文件: `ecosystem.config.cjs`
+- 详细文档: `PM2_GUIDE.md`
+- 快速参考: `PM2_QUICK.md`
 
 ### Testing/Linting
 No test framework is configured. When adding tests, first check for test commands in package.json.

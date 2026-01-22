@@ -113,7 +113,7 @@ export interface AnalysisResult {
   bazi: BaZiChart; // This will be the confirmed chart
   mainAttribute: string; // e.g., "Weak Fire", "Strong Wood"
   generalComment: string; // Destiny Overview
-  
+
   // Scored Sections
   geographicDevelopment: GeographicalAnalysis; // Geographic development direction
   personality: ScoredContent;
@@ -121,7 +121,29 @@ export interface AnalysisResult {
   fengShui: ScoredContent;
   wealth: ScoredContent;
   marriage: ScoredContent;
-  
-  volatilityAnalysis: string; // Logic analysis for the chart
+
+  volatilityAnalysis: string; // Logic analysis for chart
   timeline: YearlyFortune[];
+}
+
+export interface PartialAnalysisResult {
+  bazi?: BaZiChart;
+  mainAttribute?: string;
+  generalComment?: string;
+  geographicDevelopment?: GeographicalAnalysis;
+  personality?: ScoredContent;
+  career?: ScoredContent;
+  fengShui?: ScoredContent;
+  wealth?: ScoredContent;
+  marriage?: ScoredContent;
+  volatilityAnalysis?: string;
+  timeline?: YearlyFortune[];
+  basicAnalysis?: any;
+  extendedAnalysis?: any;
+}
+
+export interface AnalysisConfig {
+  keyYearsCount?: number;
+  maxRetries?: number;
+  enableFallback?: boolean;
 }

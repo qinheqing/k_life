@@ -38,6 +38,8 @@ const ExpandableDetailCard = ({ title, icon: Icon, data, lang, className }: { ti
   const [activeTab, setActiveTab] = useState<'overview' | 'strengths' | 'weaknesses' | 'recommendations' | 'taboos'>('overview');
   const t = getTexts(lang);
 
+  if (!data) return null;
+
   return (
     <div className={`p-6 rounded-2xl border bg-white dark:bg-amber-50 shadow-sm border-gray-100 dark:border-amber-200 transition-all ${className}`}>
       {/* Header */}
@@ -55,14 +57,18 @@ const ExpandableDetailCard = ({ title, icon: Icon, data, lang, className }: { ti
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
-        
+
         {/* Summary (Always visible) */}
-        <div className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-700">
-          {data.summary}
-        </div>
-        
+        {data.summary && (
+          <div className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-700">
+            {data.summary}
+          </div>
+        )}
+
         {/* Rating Bar */}
-        <RatingBar rating={data.rating} lang={lang} />
+        {data.rating !== undefined && (
+          <RatingBar rating={data.rating} lang={lang} />
+        )}
       </div>
       
       {/* Expanded Details */}
@@ -123,68 +129,68 @@ const ExpandableDetailCard = ({ title, icon: Icon, data, lang, className }: { ti
           </div>
           
           {/* Tab Content */}
-          <div className="min-h-[200px]">
+          <div className="min-h-[100px] custom-scrollbar">
             {activeTab === 'overview' && (
-              <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-800">
+              <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-800 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-amber-50 dark:to-yellow-50 rounded-xl border border-purple-100 dark:border-amber-200">
                 {data.details.overview}
               </div>
             )}
-            
+
             {activeTab === 'strengths' && (
               <ul className="space-y-3">
                 {data.details.strengths.map((item: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-3">
+                  <li key={idx} className="flex items-start gap-3 p-3 bg-green-50 dark:bg-amber-50 rounded-xl border border-green-100 dark:border-amber-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                     <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700 dark:text-gray-800">{item}</span>
                   </li>
                 ))}
               </ul>
             )}
-            
+
             {activeTab === 'weaknesses' && (
               <ul className="space-y-3">
                 {data.details.weaknesses.map((item: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-3">
+                  <li key={idx} className="flex items-start gap-3 p-3 bg-red-50 dark:bg-amber-50 rounded-xl border border-red-100 dark:border-amber-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                     <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700 dark:text-gray-800">{item}</span>
                   </li>
                 ))}
               </ul>
             )}
-            
+
             {activeTab === 'recommendations' && (
               <ul className="space-y-3">
                 {data.details.recommendations.map((item: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-3">
+                  <li key={idx} className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-amber-50 rounded-xl border border-yellow-100 dark:border-amber-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                     <Lightbulb className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700 dark:text-gray-800">{item}</span>
                   </li>
                 ))}
               </ul>
             )}
-            
+
             {activeTab === 'taboos' && (
               <ul className="space-y-3">
                 {data.details.taboos.map((item: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-3">
+                  <li key={idx} className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-amber-50 rounded-xl border border-orange-100 dark:border-amber-200 hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                     <AlertTriangle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700 dark:text-gray-800">{item}</span>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
-          
-          {/* Best Timing */}
-          {data.details.bestTiming && (
-            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-amber-200">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-purple-600 dark:text-orange-500" />
-                <span className="font-medium text-gray-700 dark:text-gray-800">{t.bestTiming}：</span>
-                <span className="text-gray-600 dark:text-gray-700">{data.details.bestTiming}</span>
+
+            {/* Best Timing */}
+            {data.details.bestTiming && (
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-amber-200">
+                <div className="flex items-center gap-2 text-sm p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-amber-50 dark:to-yellow-50 rounded-xl border border-blue-100 dark:border-amber-200">
+                  <Clock className="w-4 h-4 text-purple-600 dark:text-orange-500" />
+                  <span className="font-medium text-gray-700 dark:text-gray-800">{t.bestTiming}：</span>
+                  <span className="text-gray-600 dark:text-gray-700">{data.details.bestTiming}</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -195,6 +201,8 @@ const ExpandableDetailCard = ({ title, icon: Icon, data, lang, className }: { ti
 const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtitle: string, data: any, lang: Language }) => {
   const t = getTexts(lang);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!data) return null;
 
   return (
     <div className="bg-white dark:bg-amber-50 rounded-2xl border border-gray-100 dark:border-amber-200 shadow-sm transition-all">
@@ -210,18 +218,20 @@ const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtit
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-700 hover:text-purple-600 dark:hover:text-orange-500 transition-colors"
+            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-700 hover:text-purple-600 dark:hover:bg-orange-500 transition-colors"
           >
             {isExpanded ? t.collapseDetails : t.expandDetails}
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
-        <RatingBar rating={data.rating} lang={lang} />
+        {data.rating !== undefined && (
+          <RatingBar rating={data.rating} lang={lang} />
+        )}
       </div>
       
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 custom-scrollbar">
           {/* Recommended Directions */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-orange-50 dark:to-amber-100">
             <div className="flex items-center gap-2 mb-2">
@@ -240,7 +250,7 @@ const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtit
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-700">{data.recommendedDirections.description}</p>
           </div>
-          
+
           {/* Recommended City Types */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-amber-50 dark:to-yellow-100">
             <div className="flex items-center gap-2 mb-2">
@@ -263,7 +273,7 @@ const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtit
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-700">{data.recommendedCityTypes.description}</p>
           </div>
-          
+
           {/* Migration Advice */}
           <div className="p-4 rounded-lg bg-gray-50 dark:bg-amber-100">
             <div className="flex items-center gap-2 mb-2">
@@ -288,7 +298,7 @@ const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtit
               </div>
             </div>
           </div>
-          
+
           {/* Workplace Arrangement */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-50 dark:to-amber-100">
             <div className="flex items-center gap-2 mb-2">
@@ -303,21 +313,89 @@ const GeographicCard = ({ title, subtitle, data, lang }: { title: string, subtit
   );
 };
 
-// Yearly Review Item Component (with key year support)
-const YearlyReviewItem = ({ year, lang }: { year: any, lang: Language }) => {
+// Yearly Review Item Component (with enhanced info)
+const YearlyReviewItem = ({ year, lang }: { year: any, lang: Language, key?: React.Key }) => {
   const t = getTexts(lang);
-  
-  // Normal year: brief display
+  const enhanced = year.enhanced;
+
+  // Normal year: brief display with enhanced info
   if (!year.isKeyYear) {
     return (
       <div className="flex gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-amber-100 transition-colors border-b border-gray-50 dark:border-amber-200 last:border-0">
         <div className="flex-shrink-0 w-16 text-center">
-          <div className="font-bold text-lg text-slate-800 dark:text-gray-800">{year.year}</div>
-          <div className="text-xs text-gray-400 dark:text-gray-500">{year.age}{lang === 'zh' ? '岁' : 'y/o'}</div>
+          <div className="font-bold text-lg" style={{color: 'var(--text-primary)'}}>{year.year}</div>
+          <div className="text-xs" style={{color: 'var(--text-muted)'}}>{year.age}{lang === 'zh' ? '岁' : 'y/o'}</div>
         </div>
-        <div className="flex-1 flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${year.close >= year.open ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className="text-sm text-gray-600 dark:text-gray-700">{year.yearlyReview?.brief || year.summary}</span>
+
+        <div className="flex-1 space-y-2">
+          {/* Top row: trend + brief */}
+          <div className="flex items-start gap-3">
+            {/* Trend icon and label */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium" style={{
+              backgroundColor: enhanced?.trend === 'rising' ? '#dcfce7' :
+                               enhanced?.trend === 'falling' ? '#fee2e2' :
+                               enhanced?.trend === 'volatile' ? '#e0f2fe' : '#f3f4f6',
+              color: enhanced?.trend === 'rising' ? '#166534' :
+                     enhanced?.trend === 'falling' ? '#991b1b' :
+                     enhanced?.trend === 'volatile' ? '#075985' : '#4b5563'
+            }}>
+              <span>{enhanced?.trendIcon || ''}</span>
+              <span>{enhanced?.trendLabel || ''}</span>
+              <span className="text-xs opacity-70">
+                ({enhanced?.changePercent > 0 ? '+' : ''}{enhanced?.changePercent || 0}%)
+              </span>
+            </div>
+
+            {/* Strength stars */}
+            {enhanced && (
+              <div className="text-xs" style={{color: 'var(--text-muted)'}}>
+                {enhanced.strengthIcon}
+              </div>
+            )}
+
+            {/* Stage badge */}
+            {enhanced && (
+              <div className={`px-2 py-0.5 rounded-full text-xs font-medium border ${enhanced.stageColor}`}>
+                {enhanced.stageLabel}
+              </div>
+            )}
+          </div>
+
+          {/* Brief description */}
+          <div className="flex items-start gap-2">
+            <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${year.close >= year.open ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-sm leading-relaxed" style={{color: 'var(--text-secondary)'}}>
+              {year.yearlyReview?.brief || year.summary}
+            </span>
+          </div>
+
+          {/* Additional info row */}
+          {enhanced && (
+            <div className="flex items-center gap-3 text-xs" style={{color: 'var(--text-muted)'}}>
+              {/* Year element */}
+              {enhanced.yearElement && (
+                <span className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-amber-100">
+                  {enhanced.yearElement}年
+                </span>
+              )}
+              {/* Zodiac */}
+              {enhanced.yearZodiac && (
+                <span>{enhanced.yearZodiac}</span>
+              )}
+              {/* DaYun start */}
+              {enhanced.isDaYunStart && (
+                <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-orange-100 text-purple-700 dark:text-orange-800 font-medium">
+                  {lang === 'zh' ? '大运开始' : 'DaYun Start'}
+                </span>
+              )}
+              {/* Pivot year */}
+              {enhanced.isPivotYear && (
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-100 text-blue-700 dark:text-blue-800 font-medium">
+                  {lang === 'zh' ? '转折年' : 'Turning Point'}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -332,16 +410,34 @@ const YearlyReviewItem = ({ year, lang }: { year: any, lang: Language }) => {
         <div className="mt-1 text-xs px-2 py-0.5 bg-purple-100 dark:bg-orange-200 text-purple-700 dark:text-orange-800 rounded-full font-medium">
           {t.keyYear}
         </div>
+        {/* Show star rating for key years */}
+        {enhanced && (
+          <div className="mt-1 text-xs" style={{color: 'var(--text-muted)'}}>
+            {enhanced.strengthIcon}
+          </div>
+        )}
       </div>
-      
+
       <div className="flex-1 space-y-2">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          {year.isPeak && <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-200 text-yellow-700 dark:text-yellow-800 rounded-full font-bold">★ {t.ath}</span>}
+        {/* Header with enhanced info */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {year.isPeak && <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-200 text-yellow-700 dark:text-yellow-800 rounded-full font-bold">★ {t.peak}</span>}
           <div className={`w-2 h-2 rounded-full ${year.close >= year.open ? 'bg-green-500' : 'bg-red-500'}`}></div>
           <span className="text-xs font-bold text-gray-500 dark:text-gray-600">{year.summary}</span>
+
+          {/* Enhanced tags */}
+          {enhanced && (
+            <>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${enhanced.stageColor}`}>
+                {enhanced.stageLabel}
+              </span>
+              <span className="text-xs" style={{color: 'var(--text-muted)'}}>
+                {enhanced.trendIcon} {enhanced.trendLabel} ({enhanced.changePercent > 0 ? '+' : ''}{enhanced.changePercent}%)
+              </span>
+            </>
+          )}
         </div>
-        
+
         {/* Detailed content */}
         {year.yearlyReview?.detailed && (
           <div className="space-y-2 pt-2">
@@ -525,56 +621,70 @@ const AnalysisSection: React.FC<AnalysisSectionProps> = ({ analysis, lang, theme
       
       {/* 6 Grid Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <GeographicCard 
-          title={t.geographicTitle} 
-          subtitle={t.geographicSubtitle}
-          data={analysis.geographicDevelopment} 
-          lang={lang}
-        />
-        <ExpandableDetailCard 
-          title={t.personalityTitle} 
-          icon={Brain} 
-          data={analysis.personality} 
-          lang={lang}
-        />
-        <ExpandableDetailCard 
-          title={t.careerTitle} 
-          icon={Briefcase} 
-          data={analysis.career} 
-          lang={lang}
-        />
-        <ExpandableDetailCard 
-          title={t.fengShuiTitle} 
-          icon={Compass} 
-          data={analysis.fengShui} 
-          lang={lang}
-        />
-        <ExpandableDetailCard 
-          title={t.wealthTitle} 
-          icon={Gem} 
-          data={analysis.wealth} 
-          lang={lang}
-        />
-        <ExpandableDetailCard 
-          title={t.marriageTitle} 
-          icon={Heart} 
-          data={analysis.marriage} 
-          lang={lang}
-        />
+        {analysis.geographicDevelopment && (
+          <GeographicCard 
+            title={t.geographicTitle} 
+            subtitle={t.geographicSubtitle}
+            data={analysis.geographicDevelopment} 
+            lang={lang}
+          />
+        )}
+        {analysis.personality && (
+          <ExpandableDetailCard 
+            title={t.personalityTitle} 
+            icon={Brain} 
+            data={analysis.personality} 
+            lang={lang}
+          />
+        )}
+        {analysis.career && (
+          <ExpandableDetailCard 
+            title={t.careerTitle} 
+            icon={Briefcase} 
+            data={analysis.career} 
+            lang={lang}
+          />
+        )}
+        {analysis.fengShui && (
+          <ExpandableDetailCard 
+            title={t.fengShuiTitle} 
+            icon={Compass} 
+            data={analysis.fengShui} 
+            lang={lang}
+          />
+        )}
+        {analysis.wealth && (
+          <ExpandableDetailCard 
+            title={t.wealthTitle} 
+            icon={Gem} 
+            data={analysis.wealth} 
+            lang={lang}
+          />
+        )}
+        {analysis.marriage && (
+          <ExpandableDetailCard 
+            title={t.marriageTitle} 
+            icon={Heart} 
+            data={analysis.marriage} 
+            lang={lang}
+          />
+        )}
       </div>
 
       {/* Yearly Detailed Evaluation */}
-      <div className="bg-white dark:bg-amber-50 rounded-2xl shadow-sm border border-gray-100 dark:border-amber-200 p-8 transition-colors duration-200">
-        <div className="flex items-center gap-2 mb-6">
-          <Calendar className="w-6 h-6 text-purple-600 dark:text-orange-500 transition-colors duration-200" />
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-gray-800 transition-colors duration-200">{t.yearlyReviewTitle}</h2>
+      {analysis.timeline && analysis.timeline.length > 0 && (
+        <div className="bg-white dark:bg-amber-50 rounded-2xl shadow-sm border border-gray-100 dark:border-amber-200 p-8 transition-colors duration-200">
+          <div className="flex items-center gap-2 mb-6">
+            <Calendar className="w-6 h-6 text-purple-600 dark:text-orange-500 transition-colors duration-200" />
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-gray-800 transition-colors duration-200">{t.yearlyReviewTitle}</h2>
+          </div>
+          <div className="space-y-4 custom-scrollbar">
+            {analysis.timeline.map((year: any, index: number) => (
+              <YearlyReviewItem key={index} year={year} lang={lang} />
+            ))}
+          </div>
         </div>
-        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-          {analysis.timeline.map((year: any, index: number) => (
-            <YearlyReviewItem key={index} year={year} lang={lang} />
-          ))}
-        </div>
-      </div>
+      )}
 
       <div className="flex justify-center mt-8 pb-12 print:hidden" data-html2canvas-ignore="true">
         <button
